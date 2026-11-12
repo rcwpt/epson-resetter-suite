@@ -9,7 +9,7 @@
   </a>
 </p>
 
-A clean, consolidated **Epson Adjustment Program (Waste Ink Pad Counter Resetter)** suite with an interactive **CLI/GUI terminal** inspired by [massgravel.dev (MAS)](https://massgrave.dev). 100% sanitized from Trojans, malware, and malicious keygens, ready to launch with a single PowerShell command straight from GitHub!
+A clean, consolidated **Epson Adjustment Program (Waste Ink Pad Counter Resetter)** suite with an interactive **CLI/GUI terminal** inspired by [massgravel.dev (MAS)](https://massgrave.dev). 100% sanitized from Trojans, malware, and malicious keygens, ready to launch with a single short PowerShell command straight from GitHub!
 
 <p align="center">
   <b>Created with ❤️ by <a href="https://github.com/rcwpt">rcwpt</a></b> • 
@@ -18,11 +18,18 @@ A clean, consolidated **Epson Adjustment Program (Waste Ink Pad Counter Resetter
 
 ---
 
-## ⚡ Quick Online Launch (One-Liner MAS-Style)
+## ⚡ Quick Online Launch (Short One-Liner ala MAS)
 
-Open **PowerShell** (recommended: *Run as Administrator*), then copy and paste:
+Open **PowerShell** (recommended: *Run as Administrator*), then copy and paste this short command:
 
 ```powershell
+irm tinyurl.com/rcwpt-epson | iex
+```
+
+*(Or with HTTPS prefix / full GitHub raw link):*
+```powershell
+irm https://tinyurl.com/rcwpt-epson | iex
+# Fallback Direct Link:
 irm https://raw.githubusercontent.com/rcwpt/epson-resetter-suite/main/get.ps1 | iex
 ```
 
