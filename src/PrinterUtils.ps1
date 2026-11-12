@@ -77,6 +77,24 @@ function Reset-PrinterSpooler {
     }
 }
 
+function Invoke-PrinterTest {
+    Write-Host "`n================================================================================" -ForegroundColor Cyan
+    Write-Host "  LAUNCHING ULTIMATE PRINTER TEST DIAGNOSTIC TOOL                              " -ForegroundColor Green
+    Write-Host "  Repository: https://github.com/rcwpt/printertestultimate                      " -ForegroundColor White
+    Write-Host "================================================================================" -ForegroundColor Cyan
+    Write-Host "[i] Opening test page (CMYK solids, nozzle patterns, geometry alignment)..." -ForegroundColor Cyan
+    
+    $testUrl = "https://rcwpt.github.io/printertestultimate/?autoprint=1"
+    try {
+        Start-Process $testUrl
+        Write-Host "[✓] Diagnostic tool launched in your default web browser!" -ForegroundColor Green
+        Write-Host "    Direct Link: $testUrl" -ForegroundColor White
+        Write-Host "    Short Link : https://tinyurl.com/rcwpt-print" -ForegroundColor Yellow
+    } catch {
+        Write-Host "[x] Failed to open browser. Please open manually: $testUrl" -ForegroundColor Red
+    }
+}
+
 function Start-ResetterTool {
     param (
         [string]$ToolPath,
@@ -115,8 +133,14 @@ function Start-ResetterTool {
     Write-Host "Launching: $ExeName ..." -ForegroundColor Cyan
 
     try {
-        Start-Process -FilePath $fullExe -WorkingDirectory $ToolPath
-        Write-Host "[✓] Program launched successfully!" -ForegroundColor Green
+        $proc = Start-Process -FilePath $fullExe -WorkingDirectory $ToolPath -PassThru
+        Write-Host "[✓] Program launched successfully! (PID: $($proc.Id))" -ForegroundColor Green
+        
+        Write-Host "`n[?] After turning your printer back ON and completing the reset:" -ForegroundColor Yellow
+        $prompt = Read-Host "    Do you want to run a Diagnostic Test Print now? (Y/N)"
+        if ($prompt.Trim().ToUpper() -eq 'Y') {
+            Invoke-PrinterTest
+        }
     } catch {
         Write-Host "[x] Failed to launch program: $($_.Exception.Message)" -ForegroundColor Red
     }

@@ -80,7 +80,11 @@ function Show-HelpGuide {
    - When the dialog 'Please turn off the printer' appears, turn OFF the printer.
    - Click [OK], wait 5 seconds, and power ON your printer. Done!
 
-2. TROUBLESHOOTING COMMON ERRORS:
+2. POST-RESET DIAGNOSTIC TEST PRINT:
+   - Once reset is completed, run option [T] to launch Printer Test Ultimate.
+   - Inspect CMYK ink saturation, nozzle matrix, and alignment grid.
+
+3. TROUBLESHOOTING COMMON ERRORS:
    - 'Communication error! Error Code: 20000010' or '21000068':
      Cause: Printer USB port is locked by stuck documents in the print queue.
      Fix: Run option [S] from the main menu to reset the Print Spooler.
@@ -145,6 +149,7 @@ while ($true) {
     Write-Host "  [6]  Epson L6161 / L6171 / L6091" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  UTILITIES & DIAGNOSTICS:" -ForegroundColor White
+    Write-Host "  [T]  Run Ultimate Test Print Page (printertestultimate)" -ForegroundColor Green
     Write-Host "  [D]  Detect Active Printer Connection & USB Port" -ForegroundColor Yellow
     Write-Host "  [S]  Repair / Reset Print Spooler (Fix Error 20000010)" -ForegroundColor Yellow
     Write-Host "  [M]  Malware Audit Report (DepEd Ozamiz Analysis)" -ForegroundColor Red
@@ -156,7 +161,7 @@ while ($true) {
     Write-Host "  Created with love by rcwpt | Instagram: @c.wijaya.t" -ForegroundColor DarkGray
     Write-Host "================================================================================" -ForegroundColor Cyan
     
-    $choice = Read-Host " Enter choice [1-6, D, S, M, H, I, 0]"
+    $choice = Read-Host " Enter choice [1-6, T, D, S, M, H, I, 0]"
     switch ($choice.Trim().ToUpper()) {
         "1" {
             $tool = Join-Path $BinDir "L110_L210_L300_L350_L355"
@@ -187,6 +192,10 @@ while ($true) {
         "6" {
             $tool = Join-Path $BinDir "L6161_L6171_L6091"
             Start-ResetterTool -ToolPath $tool -ExeName "AdjProg.exe" -ModelLabel "L6161 / L6171 / L6091"
+            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        "T" {
+            Invoke-PrinterTest
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "D" {
