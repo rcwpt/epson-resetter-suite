@@ -29,6 +29,21 @@ function Get-EpsonUsbDevices {
     }
 }
 
+function Test-EpsonDriverInstalled {
+    param ([string]$ModelKeyword)
+    try {
+        $drivers = Get-CimInstance Win32_PrinterDriver -ErrorAction SilentlyContinue | Where-Object {
+            $_.Name -like "*Epson*" -and ($_.Name -like "*$ModelKeyword*" -or [string]::IsNullOrWhiteSpace($ModelKeyword))
+        }
+        $printers = Get-CimInstance Win32_Printer -ErrorAction SilentlyContinue | Where-Object {
+            $_.DriverName -like "*Epson*" -and ($_.DriverName -like "*$ModelKeyword*" -or $_.Name -like "*$ModelKeyword*")
+        }
+        return ($drivers.Count -gt 0 -or $printers.Count -gt 0)
+    } catch {
+        return $false
+    }
+}
+
 function Reset-PrinterSpooler {
     Write-Host "`n[i] Checking administrator privileges..." -ForegroundColor Cyan
     if (-not (Test-IsAdmin)) {
@@ -77,6 +92,119 @@ function Reset-PrinterSpooler {
     }
 }
 
+function Install-EpsonDriver {
+    param ([string]$ModelKey)
+
+    Write-Host "`n================================================================================" -ForegroundColor Cyan
+    Write-Host "               OFFICIAL EPSON DRIVER INSTALLER & DOWNLOADER                    " -ForegroundColor Yellow
+    Write-Host "================================================================================" -ForegroundColor Cyan
+
+    $driversBaseDir = Join-Path $env:LOCALAPPDATA "EpsonResetterSuite\drivers"
+    if (-not (Test-Path $driversBaseDir)) {
+        New-Item -ItemType Directory -Path $driversBaseDir -Force | Out-Null
+    }
+
+    $downloadMap = @{
+        "L210" = @{
+            Name = "Epson L210 Series (also supports L110/L300/L350/L355)"
+            Url  = "https://ozamiz.deped.gov.ph/resetter/Driver%20Epson%20L210.zip"
+            Zip  = "Driver_Epson_L210.zip"
+            Pattern = "*x64*.exe"
+        }
+        "L220" = @{
+            Name = "Epson L220 Series (also supports L130/L310/L360/L365)"
+            Url  = "https://ozamiz.deped.gov.ph/resetter/Driver%20Epson%20L220.zip"
+            Zip  = "Driver_Epson_L220.zip"
+            Pattern = "Setup.exe"
+        }
+        "L3110" = @{
+            Name = "Epson L3110 Series (also supports L1110/L3150)"
+            Url  = "https://ozamiz.deped.gov.ph/resetter/Driver%20Epson%20L3110.zip"
+            Zip  = "Driver_Epson_L3110.zip"
+            Pattern = "*x64*.exe"
+        }
+    }
+
+    # Match key
+    $matched = $null
+    foreach ($k in $downloadMap.Keys) {
+        if ($ModelKey -like "*$k*") {
+            $matched = $downloadMap[$k]
+            break
+        }
+    }
+
+    if (-not $matched) {
+        Write-Host "[i] Dedicated direct package for '$ModelKey' is not bundled in default cache." -ForegroundColor Yellow
+        Write-Host "    Redirecting to the official Epson Support & Driver Portal for $ModelKey..." -ForegroundColor Cyan
+        $officialUrl = "https://www.google.com/search?q=epson+$ModelKey+official+driver+download"
+        Start-Process $officialUrl
+        Write-Host "[✓] Opened driver download search in your web browser." -ForegroundColor Green
+        return $false
+    }
+
+    $targetDir = Join-Path $driversBaseDir $k
+    $zipPath = Join-Path $driversBaseDir $matched.Zip
+
+    Write-Host "[i] Target Driver: $($matched.Name)" -ForegroundColor Green
+
+    # Check if already downloaded and extracted
+    $installer = $null
+    if (Test-Path $targetDir) {
+        $found = Get-ChildItem -Path $targetDir -Recurse -Filter $matched.Pattern -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($found) { $installer = $found.FullName }
+    }
+
+    if (-not $installer) {
+        Write-Host "`n[1/3] Downloading official driver package (~85-92 MB)..." -ForegroundColor Cyan
+        Write-Host "      Source: $($matched.Url)" -ForegroundColor DarkGray
+        try {
+            $wc = New-Object System.Net.WebClient
+            $wc.DownloadFile($matched.Url, $zipPath)
+            Write-Host "[✓] Download complete!" -ForegroundColor Green
+        } catch {
+            Write-Host "[x] Failed to download driver: $($_.Exception.Message)" -ForegroundColor Red
+            return $false
+        }
+
+        Write-Host "[2/3] Extracting installer files..." -ForegroundColor Cyan
+        try {
+            if (-not (Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
+            Expand-Archive -Path $zipPath -DestinationPath $targetDir -Force
+            Remove-Item -Path $zipPath -Force -ErrorAction SilentlyContinue
+            Write-Host "[✓] Extraction complete!" -ForegroundColor Green
+        } catch {
+            Write-Host "[x] Failed to extract archive: $($_.Exception.Message)" -ForegroundColor Red
+            return $false
+        }
+
+        $found = Get-ChildItem -Path $targetDir -Recurse -Filter $matched.Pattern -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($found) {
+            $installer = $found.FullName
+        }
+    } else {
+        Write-Host "[✓] Driver package is already cached locally." -ForegroundColor Green
+    }
+
+    if ($installer -and (Test-Path $installer)) {
+        Write-Host "[3/3] Launching driver setup installer..." -ForegroundColor Cyan
+        Write-Host "      Executing: $(Split-Path -Leaf $installer)" -ForegroundColor White
+        Write-Host "      Please follow the on-screen installer wizard..." -ForegroundColor Yellow
+        try {
+            $proc = Start-Process -FilePath $installer -WorkingDirectory (Split-Path -Parent $installer) -Wait -PassThru
+            Write-Host "[✓] Driver installer finished with exit code: $($proc.ExitCode)" -ForegroundColor Green
+            Start-Sleep -Seconds 2
+            return $true
+        } catch {
+            Write-Host "[x] Failed to execute installer: $($_.Exception.Message)" -ForegroundColor Red
+            return $false
+        }
+    } else {
+        Write-Host "[x] Could not locate setup installer executable inside extracted folder." -ForegroundColor Red
+        return $false
+    }
+}
+
 function Invoke-PrinterTest {
     Write-Host "`n================================================================================" -ForegroundColor Cyan
     Write-Host "  LAUNCHING ULTIMATE PRINTER TEST DIAGNOSTIC TOOL                              " -ForegroundColor Green
@@ -100,6 +228,7 @@ function Start-ResetterTool {
         [string]$ToolPath,
         [string]$ExeName,
         [string]$ModelLabel,
+        [string]$DriverKey = "",
         [string]$SpecialNote = ""
     )
 
@@ -110,11 +239,26 @@ function Start-ResetterTool {
     }
 
     Write-Host "`n================================================================================" -ForegroundColor Cyan
-    Write-Host "  LAUNCHING EPSON RESETTER: $ModelLabel" -ForegroundColor Green
+    Write-Host "  CHECKING SYSTEM & PRINTER DRIVER STATUS: $ModelLabel" -ForegroundColor Green
     Write-Host "================================================================================" -ForegroundColor Cyan
-    
+
+    # Verify if driver is installed
+    $driverInstalled = Test-EpsonDriverInstalled -ModelKeyword $DriverKey
+    if ($driverInstalled) {
+        Write-Host "[✓] Epson Printer Driver: INSTALLED & DETECTED" -ForegroundColor Green
+    } else {
+        Write-Host "[!] Epson Printer Driver: NOT DETECTED in Windows" -ForegroundColor Yellow
+        Write-Host "    Notice: Without official USB drivers, the resetter may fail with:" -ForegroundColor DarkGray
+        Write-Host "    'Communication Error 21000068' or 'Port not recognized'." -ForegroundColor DarkGray
+        
+        $dlChoice = Read-Host "`n[?] Would you like to automatically download & install the official driver now? (Y/N)"
+        if ($dlChoice.Trim().ToUpper() -eq 'Y') {
+            Install-EpsonDriver -ModelKey $DriverKey
+        }
+    }
+
     if ($SpecialNote) {
-        Write-Host "[!] NOTE: $SpecialNote" -ForegroundColor Yellow
+        Write-Host "`n[!] NOTE: $SpecialNote" -ForegroundColor Yellow
     }
 
     Write-Host "`n[i] Quick Reset Instructions (Waste Ink Pad Counter):" -ForegroundColor Cyan

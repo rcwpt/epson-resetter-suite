@@ -71,14 +71,16 @@ function Show-HelpGuide {
 1. HOW TO RESET WASTE INK PAD COUNTER:
    - Power ON your Epson printer and connect it directly via USB cable (avoid Wi-Fi).
    - Select your printer model from the main menu.
-   - Click [Select] -> Choose your printer Model and USB port (e.g., USB001 / EP_L3210).
-   - Click [Particular adjustment mode].
-   - Select [Waste ink pad counter] -> Click [OK].
-   - Check 'Main pad counter' (and 'Platen pad counter' if available).
-   - Click [Check] to view current counter percentage.
-   - Click [Initialize] to reset the counter back to 0%.
-   - When the dialog 'Please turn off the printer' appears, turn OFF the printer.
-   - Click [OK], wait 5 seconds, and power ON your printer. Done!
+   - If official USB drivers are missing, allow the automated installer to set them up.
+   - In the Adjustment Program window:
+     * Click [Select] -> Choose your printer Model and USB port (e.g., USB001 / EP_L3210).
+     * Click [Particular adjustment mode].
+     * Select [Waste ink pad counter] -> Click [OK].
+     * Check 'Main pad counter' (and 'Platen pad counter' if available).
+     * Click [Check] to view current counter percentage.
+     * Click [Initialize] to reset the counter back to 0%.
+     * When the dialog 'Please turn off the printer' appears, turn OFF the printer.
+     * Click [OK], wait 5 seconds, and power ON your printer. Done!
 
 2. POST-RESET DIAGNOSTIC TEST PRINT:
    - Once reset is completed, run option [T] to launch Printer Test Ultimate.
@@ -86,11 +88,11 @@ function Show-HelpGuide {
 
 3. TROUBLESHOOTING COMMON ERRORS:
    - 'Communication error! Error Code: 20000010' or '21000068':
-     Cause: Printer USB port is locked by stuck documents in the print queue.
-     Fix: Run option [S] from the main menu to reset the Print Spooler.
+     Cause: Missing USB drivers or printer port locked by stuck print queue.
+     Fix: Run option [S] to clear spooler, or option [V] to install official drivers.
    - 'Port not recognized':
      Cause: USB driver not ready or printer is disconnected.
-     Fix: Run option [D] to verify USB hardware connection.
+     Fix: Run option [D] to verify USB hardware connection, and install drivers.
    - Password prompt for L1210 / L3210 / L3250 series:
      Password is pre-configured and provided: i-loadzone.com
 "@ -ForegroundColor White
@@ -104,17 +106,17 @@ function Show-PrinterDetection {
     Write-Host "                 ACTIVE EPSON PRINTER STATUS & USB DETECTION                   " -ForegroundColor Yellow
     Write-Host "================================================================================" -ForegroundColor Cyan
     
-    Write-Host "`n[1] Checking Registered Windows Printers (WMI)..." -ForegroundColor Cyan
+    Write-Host "`n[1] Checking Registered Windows Printers & Drivers (WMI)..." -ForegroundColor Cyan
     $printers = Get-EpsonPrinters
     if ($printers.Count -gt 0) {
-        Write-Host "    Found $($printers.Count) Epson printer(s):" -ForegroundColor Green
+        Write-Host "    Found $($printers.Count) Epson printer driver(s) registered:" -ForegroundColor Green
         foreach ($p in $printers) {
             $status = if ($p.WorkOffline) { "OFFLINE" } else { "ONLINE" }
             $isDefault = if ($p.Default) { "[DEFAULT]" } else { "" }
             Write-Host ("    * {0,-35} | Port: {1,-12} | Status: {2} {3}" -f $p.Name, $p.PortName, $status, $isDefault) -ForegroundColor White
         }
     } else {
-        Write-Host "    [!] No registered Epson printer drivers found." -ForegroundColor Yellow
+        Write-Host "    [!] No registered Epson printer drivers found in Windows." -ForegroundColor Yellow
     }
 
     Write-Host "`n[2] Checking Physical USB Printer Devices (Plug and Play)..." -ForegroundColor Cyan
@@ -126,6 +128,12 @@ function Show-PrinterDetection {
             Write-Host ("      Status   : {0}" -f $u.Status) -ForegroundColor Gray
             Write-Host ("      DeviceID : {0}" -f $u.InstanceId) -ForegroundColor DarkGray
         }
+
+        if ($printers.Count -eq 0) {
+            Write-Host "`n    [!] WARNING: USB printer is plugged in, but Windows Driver is MISSING!" -ForegroundColor Red
+            Write-Host "        Without driver, Adjustment Program will show 'Port not recognized'." -ForegroundColor Yellow
+            Write-Host "        Recommended: Run option [V] from the main menu to install official drivers." -ForegroundColor Cyan
+        }
     } else {
         Write-Host "    [!] No physical Epson USB printer detected right now." -ForegroundColor Yellow
         Write-Host "        Please make sure the printer is turned ON and USB cable is connected securely." -ForegroundColor DarkGray
@@ -133,6 +141,36 @@ function Show-PrinterDetection {
 
     Write-Host "`nPress any key to return to main menu..." -ForegroundColor Cyan
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
+
+function Show-DriverMenu {
+    Clear-Host
+    Write-Host "================================================================================" -ForegroundColor Cyan
+    Write-Host "             OFFICIAL EPSON DRIVERS - ON-DEMAND INSTALLER                      " -ForegroundColor Yellow
+    Write-Host "================================================================================" -ForegroundColor Cyan
+    Write-Host "  Select printer series driver to download and install:" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  [1]  Epson L210 Series (also supports L110 / L300 / L350 / L355)" -ForegroundColor Cyan
+    Write-Host "  [2]  Epson L220 Series (also supports L130 / L310 / L360 / L365)" -ForegroundColor Cyan
+    Write-Host "  [3]  Epson L3110 Series (also supports L1110 / L3150 / L3210 / L3250)" -ForegroundColor Green
+    Write-Host "  [4]  Other Models (Search & Open Official Epson Portal)" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  [0]  Back to Main Menu" -ForegroundColor DarkGray
+    Write-Host "================================================================================" -ForegroundColor Cyan
+
+    $drvChoice = Read-Host " Enter choice [1-4, 0]"
+    switch ($drvChoice.Trim()) {
+        "1" { Install-EpsonDriver -ModelKey "L210" }
+        "2" { Install-EpsonDriver -ModelKey "L220" }
+        "3" { Install-EpsonDriver -ModelKey "L3110" }
+        "4" {
+            $model = Read-Host " Enter your specific Epson model name (e.g., L3250, L5190, L6160)"
+            Install-EpsonDriver -ModelKey $model
+        }
+        "0" { return }
+        default { Write-Host "[!] Invalid selection." -ForegroundColor Yellow; Start-Sleep -Seconds 1 }
+    }
+    Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
 # Main Interactive Loop
@@ -149,6 +187,7 @@ while ($true) {
     Write-Host "  [6]  Epson L6161 / L6171 / L6091" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  DIAGNOSTICS & UTILITIES:" -ForegroundColor White
+    Write-Host "  [V]  Check & Install Official Epson Drivers (On-Demand Downloader)" -ForegroundColor Yellow
     Write-Host "  [T]  Run Ultimate Test Print Page (printertestultimate)" -ForegroundColor Green
     Write-Host "  [D]  Detect Active Printer Connection & USB Port" -ForegroundColor Yellow
     Write-Host "  [S]  Repair / Reset Print Spooler (Fix Error 20000010)" -ForegroundColor Yellow
@@ -161,38 +200,41 @@ while ($true) {
     Write-Host "  Created with love by rcwpt | Instagram: @c.wijaya.t" -ForegroundColor DarkGray
     Write-Host "================================================================================" -ForegroundColor Cyan
     
-    $choice = Read-Host " Enter choice [1-6, T, D, S, M, H, I, 0]"
+    $choice = Read-Host " Enter choice [1-6, V, T, D, S, M, H, I, 0]"
     switch ($choice.Trim().ToUpper()) {
         "1" {
             $tool = Join-Path $BinDir "L110_L210_L300_L350_L355"
-            Start-ResetterTool -ToolPath $tool -ExeName "Adjprogcracked.exe" -ModelLabel "L110 / L210 / L300 / L350 / L355"
+            Start-ResetterTool -ToolPath $tool -ExeName "Adjprogcracked.exe" -ModelLabel "L110 / L210 / L300 / L350 / L355" -DriverKey "L210"
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "2" {
             $tool = Join-Path $BinDir "L120"
-            Start-ResetterTool -ToolPath $tool -ExeName "L120.exe" -ModelLabel "L120"
+            Start-ResetterTool -ToolPath $tool -ExeName "L120.exe" -ModelLabel "L120" -DriverKey "L120"
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "3" {
             $tool = Join-Path $BinDir "L130_L220_L310_L360_L365"
-            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L130 / L220 / L310 / L360 / L365"
+            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L130 / L220 / L310 / L360 / L365" -DriverKey "L220"
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "4" {
             $tool = Join-Path $BinDir "L565"
-            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L565"
+            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L565" -DriverKey "L565"
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "5" {
             $tool = Join-Path $BinDir "L1210_L3210_L3250_L3260_L5290"
             $note = "If prompted for a Password upon launch, enter: i-loadzone.com"
-            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L1210 / L3210 / L3250 / L3251 / L3260 / L5290" -SpecialNote $note
+            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L1210 / L3210 / L3250 / L3251 / L3260 / L5290" -DriverKey "L3110" -SpecialNote $note
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "6" {
             $tool = Join-Path $BinDir "L6161_L6171_L6091"
-            Start-ResetterTool -ToolPath $tool -ExeName "AdjProg.exe" -ModelLabel "L6161 / L6171 / L6091"
+            Start-ResetterTool -ToolPath $tool -ExeName "AdjProg.exe" -ModelLabel "L6161 / L6171 / L6091" -DriverKey "L6160"
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        "V" {
+            Show-DriverMenu
         }
         "T" {
             Invoke-PrinterTest

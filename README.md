@@ -79,13 +79,15 @@ Our forensic analysis with Microsoft Defender Antivirus revealed:
 
 1. **Clean Terminal Interface:**
    - Elegant terminal design with clear status indicators, numbered shortcuts, and automatic administrator detection.
-2. **Integrated Diagnostic Test Print:**
+2. **Automated Driver Verification & On-Demand Installer:**
+   - When launching any reset tool or running option `[V]`, the suite automatically verifies whether the official Epson printer driver is registered in Windows. If missing, it offers to download and run the official driver setup on-demand, completely preventing *"Port not recognized"* and *"Communication Error 21000068"*.
+3. **Integrated Diagnostic Test Print:**
    - Directly linked with **[Printer Test Ultimate](https://github.com/rcwpt/printertestultimate)** (Option `[T]`). Run a full CMYK and alignment test print immediately after resetting the waste ink pad counter!
-3. **Auto-Detect Printer & USB Ports:**
-   - Integrated Windows WMI and PnP hardware queries to detect active Epson printers and USB connection states in real time.
-4. **Automated Print Spooler Fixer:**
-   - Solves the infamous technician headache: **`Communication error! Error Code: 20000010`** and **`21000068`** by terminating `spoolsv`, purging locked print queue files in `C:\Windows\System32\spool\PRINTERS`, and restarting the spooler.
-5. **Step-by-Step Guidance:**
+4. **Auto-Detect Printer & USB Ports:**
+   - Integrated Windows WMI and PnP hardware queries (Option `[D]`) to detect active Epson printers and USB connection states in real time.
+5. **Automated Print Spooler Fixer:**
+   - Solves the infamous technician headache: **`Communication error! Error Code: 20000010`** and **`21000068`** by terminating `spoolsv`, purging locked print queue files in `C:\Windows\System32\spool\PRINTERS`, and restarting the spooler (Option `[S]`).
+6. **Step-by-Step Guidance:**
    - Contextual on-screen instructions guide you through the exact reset procedure (Select Model -> Particular Adjustment Mode -> Waste ink pad counter -> Check & Initialize).
 
 ---
@@ -94,16 +96,17 @@ Our forensic analysis with Microsoft Defender Antivirus revealed:
 
 1. Turn ON the Epson printer and connect it directly via USB cable (avoid USB hubs and Wi-Fi).
 2. Launch **Epson Resetter Suite** and pick your printer model number.
-3. In the Adjustment Program window:
+3. If Windows driver is missing, confirm `Y` to automatically download and install the official Epson driver.
+4. In the Adjustment Program window:
    - Click **[Select]** and select your model and USB port (e.g., *USB001*).
    - Click **[Particular adjustment mode]**.
    - Select **[Waste ink pad counter]** in the Maintenance list, then click **[OK]**.
    - Check the **Main pad counter** box (and *Platen pad counter* if present).
    - Click **[Check]** to inspect the current pad reading.
    - Click **[Initialize]** to reset the counter back to 0%.
-4. When the pop-up says *"Please turn off the printer"*, turn OFF the printer using its physical power button.
-5. Click **[OK]** on the dialog, wait 5 seconds, and turn the printer back ON.
-6. The terminal will automatically ask if you want to run a **Diagnostic Test Print**. Press `Y` to open the vector test page!
+5. When the pop-up says *"Please turn off the printer"*, turn OFF the printer using its physical power button.
+6. Click **[OK]** on the dialog, wait 5 seconds, and turn the printer back ON.
+7. The terminal will automatically ask if you want to run a **Diagnostic Test Print**. Press `Y` to open the vector test page!
 
 ---
 
