@@ -45,19 +45,23 @@ function Test-EpsonDriverInstalled {
 }
 
 function Reset-PrinterSpooler {
-    Write-Host "`n[i] Checking administrator privileges..." -ForegroundColor Cyan
+    param ([bool]$Silent = $false)
+
+    if (-not $Silent) { Write-Host "`n[i] Checking administrator privileges..." -ForegroundColor Cyan }
     if (-not (Test-IsAdmin)) {
-        Write-Host "[!] Warning: Resetting Print Spooler requires Administrator privileges." -ForegroundColor Yellow
-        Write-Host "    Please run PowerShell or the launcher as Administrator." -ForegroundColor Yellow
+        if (-not $Silent) {
+            Write-Host "[!] Warning: Resetting Print Spooler requires Administrator privileges." -ForegroundColor Yellow
+            Write-Host "    Please run PowerShell or the launcher as Administrator." -ForegroundColor Yellow
+        }
         return $false
     }
 
     try {
-        Write-Host "[1/4] Stopping Print Spooler service (spoolsv)..." -ForegroundColor Cyan
+        if (-not $Silent) { Write-Host "[1/4] Stopping Print Spooler service (spoolsv)..." -ForegroundColor Cyan }
         Stop-Service -Name Spooler -Force -ErrorAction Stop
-        Start-Sleep -Milliseconds 800
+        Start-Sleep -Milliseconds 600
 
-        Write-Host "[2/4] Clearing stuck print queue documents..." -ForegroundColor Cyan
+        if (-not $Silent) { Write-Host "[2/4] Clearing stuck print queue documents..." -ForegroundColor Cyan }
         $spoolDir = "$env:SystemRoot\System32\spool\PRINTERS"
         if (Test-Path $spoolDir) {
             $deletedCount = 0
@@ -65,29 +69,28 @@ function Reset-PrinterSpooler {
                 try {
                     Remove-Item -Path $_.FullName -Force -Recurse -ErrorAction Stop
                     $deletedCount++
-                } catch {
-                    Write-Host "    [!] Could not delete: $($_.Name)" -ForegroundColor DarkGray
-                }
+                } catch { }
             }
-            Write-Host "    -> $deletedCount queue files cleared." -ForegroundColor Green
+            if (-not $Silent) { Write-Host "    -> $deletedCount queue files cleared." -ForegroundColor Green }
         }
 
-        Write-Host "[3/4] Restarting Print Spooler service..." -ForegroundColor Cyan
+        if (-not $Silent) { Write-Host "[3/4] Restarting Print Spooler service..." -ForegroundColor Cyan }
         Start-Service -Name Spooler -ErrorAction Stop
-        Start-Sleep -Milliseconds 500
+        Start-Sleep -Milliseconds 400
 
-        Write-Host "[4/4] Verifying service status..." -ForegroundColor Cyan
         $svc = Get-Service -Name Spooler
         if ($svc.Status -eq 'Running') {
-            Write-Host "[✓] Print Spooler service successfully restarted and is RUNNING." -ForegroundColor Green
-            Write-Host "    Epson USB port is now unlocked (Communication Error 20000010 resolved)." -ForegroundColor Green
+            if (-not $Silent) {
+                Write-Host "[✓] Print Spooler service successfully restarted and is RUNNING." -ForegroundColor Green
+                Write-Host "    Epson USB port is now unlocked (Communication Error 20000010 resolved)." -ForegroundColor Green
+            }
             return $true
         } else {
-            Write-Host "[x] Print Spooler service failed to start. Status: $($svc.Status)" -ForegroundColor Red
+            if (-not $Silent) { Write-Host "[x] Print Spooler service failed to start. Status: $($svc.Status)" -ForegroundColor Red }
             return $false
         }
     } catch {
-        Write-Host "[x] Failed to reset Print Spooler: $($_.Exception.Message)" -ForegroundColor Red
+        if (-not $Silent) { Write-Host "[x] Failed to reset Print Spooler: $($_.Exception.Message)" -ForegroundColor Red }
         return $false
     }
 }
@@ -127,9 +130,11 @@ function Install-EpsonDriver {
 
     # Match key
     $matched = $null
+    $matchedKey = ""
     foreach ($k in $downloadMap.Keys) {
         if ($ModelKey -like "*$k*") {
             $matched = $downloadMap[$k]
+            $matchedKey = $k
             break
         }
     }
@@ -143,12 +148,11 @@ function Install-EpsonDriver {
         return $false
     }
 
-    $targetDir = Join-Path $driversBaseDir $k
+    $targetDir = Join-Path $driversBaseDir $matchedKey
     $zipPath = Join-Path $driversBaseDir $matched.Zip
 
     Write-Host "[i] Target Driver: $($matched.Name)" -ForegroundColor Green
 
-    # Check if already downloaded and extracted
     $installer = $null
     if (Test-Path $targetDir) {
         $found = Get-ChildItem -Path $targetDir -Recurse -Filter $matched.Pattern -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -205,6 +209,72 @@ function Install-EpsonDriver {
     }
 }
 
+function Resolve-EpsonModelMapping {
+    param ([string]$DeviceString)
+    
+    # 1. Modern EcoTank Family
+    if ($DeviceString -match 'L1210|L3210|L3250|L3251|L3260|L5290|L3110|L3150|L1110|L4150') {
+        return @{
+            Series = "EcoTank Modern (L1210, L3210, L3250, L3110, L5290)"
+            BinDir = "L1210_L3210_L3250_L3260_L5290"
+            Exe    = "Adjprog.exe"
+            Driver = "L3110"
+            NeedsPassword = $true
+        }
+    }
+    # 2. L120
+    if ($DeviceString -match 'L120') {
+        return @{
+            Series = "Epson L120"
+            BinDir = "L120"
+            Exe    = "L120.exe"
+            Driver = "L120"
+            NeedsPassword = $false
+        }
+    }
+    # 3. L130 / L220 / L310 / L360 / L365
+    if ($DeviceString -match 'L130|L220|L310|L360|L365') {
+        return @{
+            Series = "Epson L130 / L220 / L310 / L360 / L365"
+            BinDir = "L130_L220_L310_L360_L365"
+            Exe    = "Adjprog.exe"
+            Driver = "L220"
+            NeedsPassword = $false
+        }
+    }
+    # 4. L110 / L210 / L300 / L350 / L355
+    if ($DeviceString -match 'L110|L210|L300|L350|L355') {
+        return @{
+            Series = "Epson L110 / L210 / L300 / L350 / L355"
+            BinDir = "L110_L210_L300_L350_L355"
+            Exe    = "Adjprogcracked.exe"
+            Driver = "L210"
+            NeedsPassword = $false
+        }
+    }
+    # 5. L565
+    if ($DeviceString -match 'L565') {
+        return @{
+            Series = "Epson L565"
+            BinDir = "L565"
+            Exe    = "Adjprog.exe"
+            Driver = "L565"
+            NeedsPassword = $false
+        }
+    }
+    # 6. L6160 / L6170 / L6190 / L6161 / L6171 / L6091
+    if ($DeviceString -match 'L6160|L6170|L6190|L6161|L6171|L6091') {
+        return @{
+            Series = "Epson L6161 / L6171 / L6091"
+            BinDir = "L6161_L6171_L6091"
+            Exe    = "AdjProg.exe"
+            Driver = "L6160"
+            NeedsPassword = $false
+        }
+    }
+    return $null
+}
+
 function Invoke-PrinterTest {
     Write-Host "`n================================================================================" -ForegroundColor Cyan
     Write-Host "  LAUNCHING ULTIMATE PRINTER TEST DIAGNOSTIC TOOL                              " -ForegroundColor Green
@@ -220,6 +290,106 @@ function Invoke-PrinterTest {
         Write-Host "    Short Link : https://tinyurl.com/rcwpt-print" -ForegroundColor Yellow
     } catch {
         Write-Host "[x] Failed to open browser. Please open manually: $testUrl" -ForegroundColor Red
+    }
+}
+
+function Invoke-SmartAutoMode {
+    param ([string]$BinBaseDir)
+
+    Clear-Host
+    Write-Host "================================================================================" -ForegroundColor Cyan
+    Write-Host "           SMART 1-CLICK INSTANT MODE (FOR BEGINNERS & NON-TECH USERS)          " -ForegroundColor Yellow
+    Write-Host "         Auto-Detects Hardware, Auto-Fixes Port, & Launches Matching Tool       " -ForegroundColor White
+    Write-Host "================================================================================" -ForegroundColor Cyan
+
+    Write-Host "`n[1/4] Scanning for physically connected Epson printer (USB)..." -ForegroundColor Cyan
+    $printers = Get-EpsonPrinters
+    $usb = Get-EpsonUsbDevices
+
+    $detectedString = ""
+    if ($printers.Count -gt 0) {
+        $detectedString = ($printers | ForEach-Object { "$($_.Name) $($_.DriverName)" }) -join " "
+    }
+    if ($usb.Count -gt 0) {
+        $detectedString += " " + (($usb | ForEach-Object { "$($_.FriendlyName) $($_.InstanceId)" }) -join " ")
+    }
+
+    $mapping = Resolve-EpsonModelMapping -DeviceString $detectedString
+
+    if (-not $mapping) {
+        Write-Host "    [!] Could not automatically recognize the specific model number." -ForegroundColor Yellow
+        Write-Host "        Detected hardware string: $detectedString" -ForegroundColor DarkGray
+        Write-Host "`n    Please select your general series:" -ForegroundColor White
+        Write-Host "    [1] L110 / L210 / L300 / L350 / L355" -ForegroundColor Cyan
+        Write-Host "    [2] L120" -ForegroundColor Cyan
+        Write-Host "    [3] L130 / L220 / L310 / L360 / L365" -ForegroundColor Cyan
+        Write-Host "    [4] L565" -ForegroundColor Cyan
+        Write-Host "    [5] L1210 / L3210 / L3250 / L3110 / L5290 (Modern EcoTank)" -ForegroundColor Green
+        Write-Host "    [6] L6161 / L6171 / L6091" -ForegroundColor Cyan
+        $manualPick = Read-Host "    Pick number [1-6]"
+        switch ($manualPick.Trim()) {
+            "1" { $mapping = Resolve-EpsonModelMapping "L210" }
+            "2" { $mapping = Resolve-EpsonModelMapping "L120" }
+            "3" { $mapping = Resolve-EpsonModelMapping "L220" }
+            "4" { $mapping = Resolve-EpsonModelMapping "L565" }
+            "5" { $mapping = Resolve-EpsonModelMapping "L3110" }
+            "6" { $mapping = Resolve-EpsonModelMapping "L6161" }
+            default { $mapping = Resolve-EpsonModelMapping "L3110" }
+        }
+    }
+
+    Write-Host "`n[✓] Identified Series: $($mapping.Series)" -ForegroundColor Green
+
+    Write-Host "`n[2/4] Pre-flight Check: Auto-repairing Print Spooler..." -ForegroundColor Cyan
+    Reset-PrinterSpooler -Silent $true
+    Write-Host "    [✓] Print queue and spooler port unlocked to prevent Error 20000010." -ForegroundColor Green
+
+    Write-Host "`n[3/4] Checking Windows Printer Driver..." -ForegroundColor Cyan
+    $hasDriver = Test-EpsonDriverInstalled -ModelKeyword $mapping.Driver
+    if ($hasDriver) {
+        Write-Host "    [✓] Official Epson driver is detected in Windows." -ForegroundColor Green
+    } else {
+        Write-Host "    [!] Warning: Windows driver for $($mapping.Series) is missing." -ForegroundColor Yellow
+        $instChoice = Read-Host "    Press [Enter] to auto-install driver now, or [S] to skip"
+        if ($instChoice.Trim().ToUpper() -ne 'S') {
+            Install-EpsonDriver -ModelKey $mapping.Driver
+        }
+    }
+
+    Write-Host "`n[4/4] Launching Adjustment Tool..." -ForegroundColor Cyan
+    $toolPath = Join-Path $BinBaseDir $mapping.BinDir
+    $fullExe = Join-Path $toolPath $mapping.Exe
+
+    if ($mapping.NeedsPassword) {
+        try {
+            Set-Clipboard -Value "i-loadzone.com"
+            Write-Host "    [🔑] Password 'i-loadzone.com' has been AUTO-COPIED to your clipboard!" -ForegroundColor Yellow
+            Write-Host "         (If prompted for password, just press Ctrl + V and hit OK)" -ForegroundColor Yellow
+        } catch { }
+    }
+
+    Write-Host ""
+    Write-Host "┌────────────────────────────────────────────────────────────────────────┐" -ForegroundColor Yellow
+    Write-Host "│                 FOOLPROOF 4-STEP RESET INSTRUCTIONS                    │" -ForegroundColor Yellow
+    Write-Host "├────────────────────────────────────────────────────────────────────────┤" -ForegroundColor Yellow
+    Write-Host "│ 1. In the program window, click [Particular adjustment mode].          │" -ForegroundColor White
+    Write-Host "│ 2. Double-click [Waste ink pad counter] in the Maintenance list.       │" -ForegroundColor White
+    Write-Host "│ 3. Check the box [Main pad counter], then click [Initialize].          │" -ForegroundColor White
+    Write-Host "│ 4. Turn OFF the printer with power button when prompted, then turn ON! │" -ForegroundColor Green
+    Write-Host "└────────────────────────────────────────────────────────────────────────┘" -ForegroundColor Yellow
+    Write-Host ""
+
+    try {
+        $proc = Start-Process -FilePath $fullExe -WorkingDirectory $toolPath -PassThru
+        Write-Host "[✓] Tool is running! (PID: $($proc.Id))" -ForegroundColor Green
+        
+        Write-Host "`n[?] After your printer has been turned back ON:" -ForegroundColor Yellow
+        $prompt = Read-Host "    Do you want to run a Diagnostic Test Print now? (Y/N)"
+        if ($prompt.Trim().ToUpper() -eq 'Y') {
+            Invoke-PrinterTest
+        }
+    } catch {
+        Write-Host "[x] Failed to launch: $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 
@@ -242,7 +412,6 @@ function Start-ResetterTool {
     Write-Host "  CHECKING SYSTEM & PRINTER DRIVER STATUS: $ModelLabel" -ForegroundColor Green
     Write-Host "================================================================================" -ForegroundColor Cyan
 
-    # Verify if driver is installed
     $driverInstalled = Test-EpsonDriverInstalled -ModelKeyword $DriverKey
     if ($driverInstalled) {
         Write-Host "[✓] Epson Printer Driver: INSTALLED & DETECTED" -ForegroundColor Green

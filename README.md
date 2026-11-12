@@ -37,28 +37,26 @@ irm https://raw.githubusercontent.com/rcwpt/epson-resetter-suite/main/get.ps1 | 
 
 ---
 
-## 💻 Manual Offline Run (Portable)
+## 🚀 Key Highlights & Features
 
-1. Clone this repository or download the ZIP archive from **Code > Download ZIP**:
-   ```bash
-   git clone https://github.com/rcwpt/epson-resetter-suite.git
-   cd epson-resetter-suite
-   ```
-2. Right-click **`Run.bat`** and select **Run as administrator** (or execute `powershell -ExecutionPolicy Bypass -File src\EpsonResetter.ps1`).
-
----
-
-## 🛡️ Security Audit & Why This Suite Exists
-
-Many technicians and users download resetters from public repositories or institutional servers (such as public `/resetter/` directories) that instruct users to *"Turn off Real-Time Protection"*.
-
-Our forensic analysis with Microsoft Defender Antivirus revealed:
-* **The original archives were heavily compromised**: Multiple active Trojans (**`Trojan:Win32/Vigorf.A`**, **`Trojan:Win32/Tiggre`**, and **`Trojan:Win32/Occamy!rfn`**) were embedded inside `Keygen.exe` files and dropper archives.
-* **This suite is 100% sanitized**: All dangerous generators and backdoor payloads have been removed. Every executable in the `bin/` directory has been verified with Microsoft Defender:
-  ```text
-  Scanning C:\...\epson-resetter-suite\bin found no threats.
-  ```
-* Read the detailed forensic investigation in **[MALWARE_AUDIT.md](MALWARE_AUDIT.md)**.
+1. **⚡ Smart 1-Click Instant Mode (Option `[A]`):**
+   - **Specially built for non-tech-savvy users ("Orang Gaptek")!**
+   - Automatically detects your connected Epson printer model and USB port.
+   - Automatically clears stuck print jobs (spooler) to prevent Error `20000010`.
+   - Checks if the official USB driver is installed; offers auto-install if missing.
+   - Copies required passwords (e.g., `i-loadzone.com`) to your clipboard automatically.
+   - Launches the exact matching Adjustment Program with a simple 4-step on-screen guide!
+2. **Automated Driver Verification & On-Demand Downloader (Option `[V]`):**
+   - Seamlessly fetches and installs official Epson drivers on-demand, resolving *"Port not recognized"* and *"Communication Error 21000068"*.
+3. **Integrated Diagnostic Test Print (Option `[T]`):**
+   - Directly linked with **[Printer Test Ultimate](https://github.com/rcwpt/printertestultimate)**. Prompts you automatically to run a full CMYK and nozzle test print as soon as you finish resetting!
+4. **Clean & 100% Sanitized Binaries:**
+   - All trojans, backdoors, and suspicious keygens from public sources have been eliminated. Verified with Microsoft Defender Antivirus:
+     ```text
+     Scanning C:\...\epson-resetter-suite\bin found no threats.
+     ```
+5. **Print Spooler Repair (Option `[S]`):**
+   - One-click tool to terminate `spoolsv`, clear locked spooler queues in `C:\Windows\System32\spool\PRINTERS`, and restart the service.
 
 ---
 
@@ -70,43 +68,23 @@ Our forensic analysis with Microsoft Defender Antivirus revealed:
 | **EcoTank L120** | L120 (Patched Edition - Ready to use) | 🟢 100% Clean |
 | **EcoTank L130 - L365** | L130, L220, L310, L360, L365 | 🟢 100% Clean |
 | **EcoTank L500 Series** | L565 | 🟢 100% Clean |
-| **EcoTank Modern Family** | L1210, L3210, L3250, L3251, L3260, L5290 | 🟢 100% Clean *(Password: `i-loadzone.com`)* |
+| **EcoTank Modern Family** | L1210, L3210, L3250, L3251, L3260, L5290 | 🟢 100% Clean *(Auto-Clipboard: `i-loadzone.com`)* |
 | **EcoTank L6000 Series** | L6161, L6171, L6091 | 🟢 100% Clean |
 
 ---
 
-## 🚀 Key Highlights
+## 📖 How to Reset in 4 Simple Steps
 
-1. **Clean Terminal Interface:**
-   - Elegant terminal design with clear status indicators, numbered shortcuts, and automatic administrator detection.
-2. **Automated Driver Verification & On-Demand Installer:**
-   - When launching any reset tool or running option `[V]`, the suite automatically verifies whether the official Epson printer driver is registered in Windows. If missing, it offers to download and run the official driver setup on-demand, completely preventing *"Port not recognized"* and *"Communication Error 21000068"*.
-3. **Integrated Diagnostic Test Print:**
-   - Directly linked with **[Printer Test Ultimate](https://github.com/rcwpt/printertestultimate)** (Option `[T]`). Run a full CMYK and alignment test print immediately after resetting the waste ink pad counter!
-4. **Auto-Detect Printer & USB Ports:**
-   - Integrated Windows WMI and PnP hardware queries (Option `[D]`) to detect active Epson printers and USB connection states in real time.
-5. **Automated Print Spooler Fixer:**
-   - Solves the infamous technician headache: **`Communication error! Error Code: 20000010`** and **`21000068`** by terminating `spoolsv`, purging locked print queue files in `C:\Windows\System32\spool\PRINTERS`, and restarting the spooler (Option `[S]`).
-6. **Step-by-Step Guidance:**
-   - Contextual on-screen instructions guide you through the exact reset procedure (Select Model -> Particular Adjustment Mode -> Waste ink pad counter -> Check & Initialize).
-
----
-
-## 📖 Step-by-Step Waste Ink Pad Reset Guide
-
-1. Turn ON the Epson printer and connect it directly via USB cable (avoid USB hubs and Wi-Fi).
-2. Launch **Epson Resetter Suite** and pick your printer model number.
-3. If Windows driver is missing, confirm `Y` to automatically download and install the official Epson driver.
-4. In the Adjustment Program window:
-   - Click **[Select]** and select your model and USB port (e.g., *USB001*).
-   - Click **[Particular adjustment mode]**.
-   - Select **[Waste ink pad counter]** in the Maintenance list, then click **[OK]**.
-   - Check the **Main pad counter** box (and *Platen pad counter* if present).
-   - Click **[Check]** to inspect the current pad reading.
-   - Click **[Initialize]** to reset the counter back to 0%.
-5. When the pop-up says *"Please turn off the printer"*, turn OFF the printer using its physical power button.
-6. Click **[OK]** on the dialog, wait 5 seconds, and turn the printer back ON.
-7. The terminal will automatically ask if you want to run a **Diagnostic Test Print**. Press `Y` to open the vector test page!
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                 FOOLPROOF 4-STEP RESET INSTRUCTIONS                    │
+├────────────────────────────────────────────────────────────────────────┤
+│ 1. In the program window, click [Particular adjustment mode].          │
+│ 2. Double-click [Waste ink pad counter] in the Maintenance list.       │
+│ 3. Check the box [Main pad counter], then click [Initialize].          │
+│ 4. Turn OFF the printer with power button when prompted, then turn ON! │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 

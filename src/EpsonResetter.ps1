@@ -69,9 +69,8 @@ function Show-HelpGuide {
     Write-Host "================================================================================" -ForegroundColor Cyan
     Write-Host @"
 1. HOW TO RESET WASTE INK PAD COUNTER:
+   - TIP: For beginners, choose [A] SMART AUTO MODE to do everything automatically!
    - Power ON your Epson printer and connect it directly via USB cable (avoid Wi-Fi).
-   - Select your printer model from the main menu.
-   - If official USB drivers are missing, allow the automated installer to set them up.
    - In the Adjustment Program window:
      * Click [Select] -> Choose your printer Model and USB port (e.g., USB001 / EP_L3210).
      * Click [Particular adjustment mode].
@@ -177,8 +176,10 @@ function Show-DriverMenu {
 while ($true) {
     Show-Header
 
-    Write-Host "  SELECT EPSON PRINTER SERIES TO RESET:" -ForegroundColor White
+    Write-Host "  INSTANT 1-CLICK MODE:" -ForegroundColor Yellow
+    Write-Host "  [A]  SMART AUTO MODE (Recommended for Beginners - Auto-Detects & Fixes)" -ForegroundColor Green
     Write-Host ""
+    Write-Host "  MANUAL PRINTER SELECTION:" -ForegroundColor White
     Write-Host "  [1]  Epson L110 / L210 / L300 / L350 / L355" -ForegroundColor Cyan
     Write-Host "  [2]  Epson L120 (Patched Edition - Ready to Use)" -ForegroundColor Cyan
     Write-Host "  [3]  Epson L130 / L220 / L310 / L360 / L365" -ForegroundColor Cyan
@@ -200,8 +201,12 @@ while ($true) {
     Write-Host "  Created with love by rcwpt | Instagram: @c.wijaya.t" -ForegroundColor DarkGray
     Write-Host "================================================================================" -ForegroundColor Cyan
     
-    $choice = Read-Host " Enter choice [1-6, V, T, D, S, M, H, I, 0]"
+    $choice = Read-Host " Enter choice [A, 1-6, V, T, D, S, M, H, I, 0]"
     switch ($choice.Trim().ToUpper()) {
+        "A" {
+            Invoke-SmartAutoMode -BinBaseDir $BinDir
+            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
         "1" {
             $tool = Join-Path $BinDir "L110_L210_L300_L350_L355"
             Start-ResetterTool -ToolPath $tool -ExeName "Adjprogcracked.exe" -ModelLabel "L110 / L210 / L300 / L350 / L355" -DriverKey "L210"
@@ -224,7 +229,8 @@ while ($true) {
         }
         "5" {
             $tool = Join-Path $BinDir "L1210_L3210_L3250_L3260_L5290"
-            $note = "If prompted for a Password upon launch, enter: i-loadzone.com"
+            $note = "If prompted for a Password upon launch, enter: i-loadzone.com (Already copied to clipboard!)"
+            try { Set-Clipboard -Value "i-loadzone.com" } catch {}
             Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L1210 / L3210 / L3250 / L3251 / L3260 / L5290" -DriverKey "L3110" -SpecialNote $note
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
