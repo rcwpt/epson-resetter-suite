@@ -1,11 +1,11 @@
 ﻿# ==============================================================================
-#  EPSON RESETTER ALL-IN-ONE SUITE (MAS Style CLI/GUI)
+#  EPSON RESETTER SUITE
 #  Created with love by rcwpt | Instagram: @c.wijaya.t
 # ==============================================================================
 
 #Requires -Version 5.1
 
-$Host.UI.RawUI.WindowTitle = "Epson Resetter All-In-One Suite [Clean Edition] - by rcwpt"
+$Host.UI.RawUI.WindowTitle = "Epson Resetter Suite - by rcwpt"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $BaseDir = Split-Path -Parent $ScriptDir
@@ -17,8 +17,8 @@ $BinDir = Join-Path $BaseDir "bin"
 function Show-Header {
     Clear-Host
     Write-Host "================================================================================" -ForegroundColor Cyan
-    Write-Host "               EPSON RESETTER ALL-IN-ONE SUITE (CLI/GUI)                        " -ForegroundColor Yellow
-    Write-Host "         Waste Ink Pad Counter Reset & Maintenance Tool (MAS-Style)             " -ForegroundColor White
+    Write-Host "                             EPSON RESETTER SUITE                               " -ForegroundColor Yellow
+    Write-Host "                Waste Ink Pad Counter Reset & Maintenance Tool                  " -ForegroundColor White
     Write-Host "             Created with love by rcwpt | Instagram: @c.wijaya.t                " -ForegroundColor Magenta
     Write-Host "================================================================================" -ForegroundColor Cyan
     
@@ -49,7 +49,7 @@ Active Trojans & Critical Malware Droppers Detected in the original files:
 
 SANITIZED, 100% CLEAN TOOLS INCLUDED IN THIS SUITE:
 [✓] L110 / L210 / L300 / L350 / L355 Series -> 0 Threats (Clean)
-[✓] L120 (Cracked Edition)                   -> 0 Threats (Clean)
+[✓] L120 (Patched Edition)                  -> 0 Threats (Clean)
 [✓] L130 / L220 / L310 / L360 / L365 Series  -> 0 Threats (Clean)
 [✓] L565 Series                              -> 0 Threats (Clean)
 [✓] Modern L1210 / L3210 / L3250 / L3260 / L5290 -> 0 Threats (Clean)
@@ -142,13 +142,13 @@ while ($true) {
     Write-Host "  SELECT EPSON PRINTER SERIES TO RESET:" -ForegroundColor White
     Write-Host ""
     Write-Host "  [1]  Epson L110 / L210 / L300 / L350 / L355" -ForegroundColor Cyan
-    Write-Host "  [2]  Epson L120 (Cracked Edition - Ready to Use)" -ForegroundColor Cyan
+    Write-Host "  [2]  Epson L120 (Patched Edition - Ready to Use)" -ForegroundColor Cyan
     Write-Host "  [3]  Epson L130 / L220 / L310 / L360 / L365" -ForegroundColor Cyan
     Write-Host "  [4]  Epson L565" -ForegroundColor Cyan
     Write-Host "  [5]  Epson L1210 / L3210 / L3250 / L3251 / L3260 / L5290 (Modern EcoTank)" -ForegroundColor Green
     Write-Host "  [6]  Epson L6161 / L6171 / L6091" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  UTILITIES & DIAGNOSTICS:" -ForegroundColor White
+    Write-Host "  DIAGNOSTICS & UTILITIES:" -ForegroundColor White
     Write-Host "  [T]  Run Ultimate Test Print Page (printertestultimate)" -ForegroundColor Green
     Write-Host "  [D]  Detect Active Printer Connection & USB Port" -ForegroundColor Yellow
     Write-Host "  [S]  Repair / Reset Print Spooler (Fix Error 20000010)" -ForegroundColor Yellow
@@ -219,7 +219,7 @@ while ($true) {
         "0" {
             Clear-Host
             Write-Host "`n================================================================================" -ForegroundColor Cyan
-            Write-Host "  Thank you for using Epson Resetter All-In-One Suite." -ForegroundColor Green
+            Write-Host "  Thank you for using Epson Resetter Suite." -ForegroundColor Green
             Write-Host "  Created with love by rcwpt" -ForegroundColor Magenta
             Write-Host "  Connect on Instagram: https://www.instagram.com/c.wijaya.t (@c.wijaya.t)" -ForegroundColor Yellow
             Write-Host "================================================================================`n" -ForegroundColor Cyan

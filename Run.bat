@@ -1,5 +1,5 @@
 @echo off
-title Epson Resetter All-In-One Suite [Created with love by rcwpt - @c.wijaya.t]
+title Epson Resetter Suite [Created with love by rcwpt - @c.wijaya.t]
 setlocal EnableDelayedExpansion
 
 :: Check Administrator Privileges

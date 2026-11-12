@@ -1,4 +1,4 @@
-# Epson Resetter All-In-One Suite (MAS-Style CLI/GUI)
+# Epson Resetter Suite
 
 <p align="center">
   <img src="https://img.shields.io/badge/Security-100%25%20Defender%20Clean-brightgreen?style=for-the-badge&logo=windows" alt="Defender Clean">
@@ -9,7 +9,7 @@
   </a>
 </p>
 
-A clean, consolidated **Epson Adjustment Program (Waste Ink Pad Counter Resetter)** suite with an interactive **CLI/GUI terminal** inspired by [massgravel.dev (MAS)](https://massgrave.dev). 100% sanitized from Trojans, malware, and malicious keygens, ready to launch with a single short PowerShell command straight from GitHub!
+A clean, consolidated **Epson Adjustment Program (Waste Ink Pad Counter Resetter)** suite with an interactive terminal interface. 100% sanitized from Trojans, malware, and malicious keygens, ready to launch with a single short PowerShell command straight from GitHub!
 
 <p align="center">
   <b>Created with ❤️ by <a href="https://github.com/rcwpt">rcwpt</a></b> • 
@@ -18,9 +18,9 @@ A clean, consolidated **Epson Adjustment Program (Waste Ink Pad Counter Resetter
 
 ---
 
-## ⚡ Quick Online Launch (Short One-Liner ala MAS)
+## ⚡ Quick Online Launch (Short One-Liner)
 
-Open **PowerShell** (recommended: *Run as Administrator*), then copy and paste this short command:
+Open **PowerShell** (recommended: *Run as Administrator*), then copy and paste this command:
 
 ```powershell
 irm tinyurl.com/rcwpt-epson | iex
@@ -29,7 +29,7 @@ irm tinyurl.com/rcwpt-epson | iex
 *(Or with HTTPS prefix / full GitHub raw link):*
 ```powershell
 irm https://tinyurl.com/rcwpt-epson | iex
-# Fallback Direct Link:
+# Direct GitHub:
 irm https://raw.githubusercontent.com/rcwpt/epson-resetter-suite/main/get.ps1 | iex
 ```
 
@@ -67,7 +67,7 @@ Our forensic analysis with Microsoft Defender Antivirus revealed:
 | Series Category | Supported Models | Binary Status |
 | :--- | :--- | :--- |
 | **EcoTank L-Series Classic** | L110, L210, L300, L350, L355 | 🟢 100% Clean |
-| **EcoTank L120** | L120 (Cracked Edition - Ready to use) | 🟢 100% Clean |
+| **EcoTank L120** | L120 (Patched Edition - Ready to use) | 🟢 100% Clean |
 | **EcoTank L130 - L365** | L130, L220, L310, L360, L365 | 🟢 100% Clean |
 | **EcoTank L500 Series** | L565 | 🟢 100% Clean |
 | **EcoTank Modern Family** | L1210, L3210, L3250, L3251, L3260, L5290 | 🟢 100% Clean *(Password: `i-loadzone.com`)* |
@@ -77,13 +77,15 @@ Our forensic analysis with Microsoft Defender Antivirus revealed:
 
 ## 🚀 Key Highlights
 
-1. **MAS-Inspired Terminal UI:**
+1. **Clean Terminal Interface:**
    - Elegant terminal design with clear status indicators, numbered shortcuts, and automatic administrator detection.
-2. **Auto-Detect Printer & USB Ports:**
+2. **Integrated Diagnostic Test Print:**
+   - Directly linked with **[Printer Test Ultimate](https://github.com/rcwpt/printertestultimate)** (Option `[T]`). Run a full CMYK and alignment test print immediately after resetting the waste ink pad counter!
+3. **Auto-Detect Printer & USB Ports:**
    - Integrated Windows WMI and PnP hardware queries to detect active Epson printers and USB connection states in real time.
-3. **Automated Print Spooler Fixer:**
+4. **Automated Print Spooler Fixer:**
    - Solves the infamous technician headache: **`Communication error! Error Code: 20000010`** and **`21000068`** by terminating `spoolsv`, purging locked print queue files in `C:\Windows\System32\spool\PRINTERS`, and restarting the spooler.
-4. **Step-by-Step Guidance:**
+5. **Step-by-Step Guidance:**
    - Contextual on-screen instructions guide you through the exact reset procedure (Select Model -> Particular Adjustment Mode -> Waste ink pad counter -> Check & Initialize).
 
 ---
@@ -100,7 +102,8 @@ Our forensic analysis with Microsoft Defender Antivirus revealed:
    - Click **[Check]** to inspect the current pad reading.
    - Click **[Initialize]** to reset the counter back to 0%.
 4. When the pop-up says *"Please turn off the printer"*, turn OFF the printer using its physical power button.
-5. Click **[OK]** on the dialog, wait 5 seconds, and turn the printer back ON. The alternating ink/paper blinking lights will stop, and the printer will be ready to print!
+5. Click **[OK]** on the dialog, wait 5 seconds, and turn the printer back ON.
+6. The terminal will automatically ask if you want to run a **Diagnostic Test Print**. Press `Y` to open the vector test page!
 
 ---
 
