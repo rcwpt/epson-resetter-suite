@@ -1,4 +1,5 @@
 ﻿# Printer Utility Functions for Epson Resetter Suite
+# Created with love by rcwpt | Instagram: @c.wijaya.t
 
 function Test-IsAdmin {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -29,19 +30,19 @@ function Get-EpsonUsbDevices {
 }
 
 function Reset-PrinterSpooler {
-    Write-Host "`n[i] Memeriksa hak akses administrator..." -ForegroundColor Cyan
+    Write-Host "`n[i] Checking administrator privileges..." -ForegroundColor Cyan
     if (-not (Test-IsAdmin)) {
-        Write-Host "[!] Perhatian: Mereset Print Spooler membutuhkan hak Administrator." -ForegroundColor Yellow
-        Write-Host "    Silakan jalankan terminal / script sebagai Administrator." -ForegroundColor Yellow
+        Write-Host "[!] Warning: Resetting Print Spooler requires Administrator privileges." -ForegroundColor Yellow
+        Write-Host "    Please run PowerShell or the launcher as Administrator." -ForegroundColor Yellow
         return $false
     }
 
     try {
-        Write-Host "[1/4] Menghentikan layanan Print Spooler (spoolsv)..." -ForegroundColor Cyan
+        Write-Host "[1/4] Stopping Print Spooler service (spoolsv)..." -ForegroundColor Cyan
         Stop-Service -Name Spooler -Force -ErrorAction Stop
         Start-Sleep -Milliseconds 800
 
-        Write-Host "[2/4] Membersihkan antrean dokumen (queue) yang macet..." -ForegroundColor Cyan
+        Write-Host "[2/4] Clearing stuck print queue documents..." -ForegroundColor Cyan
         $spoolDir = "$env:SystemRoot\System32\spool\PRINTERS"
         if (Test-Path $spoolDir) {
             $deletedCount = 0
@@ -50,28 +51,28 @@ function Reset-PrinterSpooler {
                     Remove-Item -Path $_.FullName -Force -Recurse -ErrorAction Stop
                     $deletedCount++
                 } catch {
-                    Write-Host "    [!] Tidak dapat menghapus: $($_.Name)" -ForegroundColor DarkGray
+                    Write-Host "    [!] Could not delete: $($_.Name)" -ForegroundColor DarkGray
                 }
             }
-            Write-Host "    -> $deletedCount file antrean dibersihkan." -ForegroundColor Green
+            Write-Host "    -> $deletedCount queue files cleared." -ForegroundColor Green
         }
 
-        Write-Host "[3/4] Menjalankan kembali layanan Print Spooler..." -ForegroundColor Cyan
+        Write-Host "[3/4] Restarting Print Spooler service..." -ForegroundColor Cyan
         Start-Service -Name Spooler -ErrorAction Stop
         Start-Sleep -Milliseconds 500
 
-        Write-Host "[4/4] Verifikasi status layanan..." -ForegroundColor Cyan
+        Write-Host "[4/4] Verifying service status..." -ForegroundColor Cyan
         $svc = Get-Service -Name Spooler
         if ($svc.Status -eq 'Running') {
-            Write-Host "[✓] Layanan Print Spooler berhasil direset dan berstatus RUNNING." -ForegroundColor Green
-            Write-Host "    Port USB Epson kini bebas dari penguncian (Communication Error 20000010 teratasi)." -ForegroundColor Green
+            Write-Host "[✓] Print Spooler service successfully restarted and is RUNNING." -ForegroundColor Green
+            Write-Host "    Epson USB port is now unlocked (Communication Error 20000010 resolved)." -ForegroundColor Green
             return $true
         } else {
-            Write-Host "[x] Layanan Print Spooler gagal berjalan. Status: $($svc.Status)" -ForegroundColor Red
+            Write-Host "[x] Print Spooler service failed to start. Status: $($svc.Status)" -ForegroundColor Red
             return $false
         }
     } catch {
-        Write-Host "[x] Gagal mereset Print Spooler: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[x] Failed to reset Print Spooler: $($_.Exception.Message)" -ForegroundColor Red
         return $false
     }
 }
@@ -86,37 +87,37 @@ function Start-ResetterTool {
 
     $fullExe = Join-Path $ToolPath $ExeName
     if (-not (Test-Path $fullExe)) {
-        Write-Host "`n[x] File eksekusi tidak ditemukan: $fullExe" -ForegroundColor Red
+        Write-Host "`n[x] Executable file not found: $fullExe" -ForegroundColor Red
         return
     }
 
     Write-Host "`n================================================================================" -ForegroundColor Cyan
-    Write-Host "  MENJALANKAN RESETTER EPSON: $ModelLabel" -ForegroundColor Green
+    Write-Host "  LAUNCHING EPSON RESETTER: $ModelLabel" -ForegroundColor Green
     Write-Host "================================================================================" -ForegroundColor Cyan
     
     if ($SpecialNote) {
-        Write-Host "[!] PENTING: $SpecialNote" -ForegroundColor Yellow
+        Write-Host "[!] NOTE: $SpecialNote" -ForegroundColor Yellow
     }
 
-    Write-Host "`n[i] Petunjuk Penggunaan Cepat (Waste Ink Pad Reset):" -ForegroundColor Cyan
-    Write-Host "  1. Pastikan printer Epson NYALA dan TERHUBUNG kabel USB ke PC (hindari Wi-Fi)." -ForegroundColor White
-    Write-Host "  2. Pastikan tidak ada dokumen yang sedang mencetak (Queue kosong)." -ForegroundColor White
-    Write-Host "  3. Di jendela Adjustment Program:" -ForegroundColor White
-    Write-Host "     - Klik tombol [Select] -> Pilih Model dan Port USB printer Anda." -ForegroundColor Gray
-    Write-Host "     - Klik tombol [Particular adjustment mode]." -ForegroundColor Gray
-    Write-Host "     - Pilih [Waste ink pad counter] lalu klik [OK]." -ForegroundColor Gray
-    Write-Host "     - Centang kotak [Main pad counter] (dan [Platen pad counter] jika ada)." -ForegroundColor Gray
-    Write-Host "     - Klik [Check] untuk membaca persentase counter." -ForegroundColor Gray
-    Write-Host "     - Klik [Initialize] untuk mereset counter ke 0%." -ForegroundColor Yellow
-    Write-Host "  4. Saat diminta 'Please turn off the printer', MATIKAN printer lewat tombol power." -ForegroundColor White
-    Write-Host "  5. Tunggu 5 detik, lalu NYALAKAN kembali printer. Selesai!" -ForegroundColor Green
+    Write-Host "`n[i] Quick Reset Instructions (Waste Ink Pad Counter):" -ForegroundColor Cyan
+    Write-Host "  1. Ensure printer is ON and connected directly via USB cable (avoid Wi-Fi)." -ForegroundColor White
+    Write-Host "  2. Ensure the print queue is empty (no pending print jobs)." -ForegroundColor White
+    Write-Host "  3. In the Adjustment Program window:" -ForegroundColor White
+    Write-Host "     - Click [Select] -> Choose your Model and USB Port." -ForegroundColor Gray
+    Write-Host "     - Click [Particular adjustment mode]." -ForegroundColor Gray
+    Write-Host "     - Select [Waste ink pad counter] and click [OK]." -ForegroundColor Gray
+    Write-Host "     - Check the box for [Main pad counter] (and [Platen pad counter] if present)." -ForegroundColor Gray
+    Write-Host "     - Click [Check] to read current counter readings." -ForegroundColor Gray
+    Write-Host "     - Click [Initialize] to reset counter to 0%." -ForegroundColor Yellow
+    Write-Host "  4. When prompted 'Please turn off the printer', switch OFF the printer." -ForegroundColor White
+    Write-Host "  5. Wait 5 seconds, then turn printer back ON. You are done!" -ForegroundColor Green
     Write-Host "--------------------------------------------------------------------------------" -ForegroundColor DarkGray
-    Write-Host "Membuka: $ExeName ..." -ForegroundColor Cyan
+    Write-Host "Launching: $ExeName ..." -ForegroundColor Cyan
 
     try {
         Start-Process -FilePath $fullExe -WorkingDirectory $ToolPath
-        Write-Host "[✓] Program berhasil diluncurkan!" -ForegroundColor Green
+        Write-Host "[✓] Program launched successfully!" -ForegroundColor Green
     } catch {
-        Write-Host "[x] Gagal menjalankan program: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[x] Failed to launch program: $($_.Exception.Message)" -ForegroundColor Red
     }
 }

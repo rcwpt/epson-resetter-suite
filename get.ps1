@@ -1,5 +1,6 @@
 ﻿# ==============================================================================
 #  EPSON RESETTER ALL-IN-ONE SUITE - WEB LAUNCHER (MAS-Style)
+#  Created with love by rcwpt | Instagram: @c.wijaya.t
 #  Usage: irm https://raw.githubusercontent.com/rcwpt/epson-resetter-suite/main/get.ps1 | iex
 # ==============================================================================
 
@@ -13,12 +14,12 @@ function Test-Admin {
 
 # Auto-elevate to Administrator if not already elevated
 if (-not (Test-Admin)) {
-    Write-Host "[i] Meminta hak akses Administrator untuk mengontrol Print Spooler & Port USB..." -ForegroundColor Cyan
+    Write-Host "[i] Requesting Administrator privileges to manage Print Spooler & direct USB ports..." -ForegroundColor Cyan
     try {
         Start-Process powershell.exe -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"& { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; irm https://raw.githubusercontent.com/rcwpt/epson-resetter-suite/main/get.ps1 | iex }`""
         exit
     } catch {
-        Write-Host "[!] Gagal eskalasi otomatis. Melanjutkan dalam mode pengguna standar..." -ForegroundColor Yellow
+        Write-Host "[!] Auto-elevation declined. Continuing in standard user mode..." -ForegroundColor Yellow
     }
 }
 
@@ -28,22 +29,23 @@ $ZipTarget = Join-Path $env:TEMP "epson-resetter-suite.zip"
 
 Write-Host "================================================================================" -ForegroundColor Cyan
 Write-Host "              EPSON RESETTER ALL-IN-ONE SUITE - WEB INSTALLER                  " -ForegroundColor Yellow
+Write-Host "             Created with love by rcwpt | Instagram: @c.wijaya.t                " -ForegroundColor Magenta
 Write-Host "================================================================================" -ForegroundColor Cyan
 
 # Check if suite already exists locally or update is needed
 $MainScript = Join-Path $InstallDir "src\EpsonResetter.ps1"
 
 if (-not (Test-Path $MainScript)) {
-    Write-Host "[1/3] Mengunduh paket Epson Resetter Suite dari GitHub..." -ForegroundColor Cyan
+    Write-Host "[1/3] Downloading clean Epson Resetter Suite package from GitHub..." -ForegroundColor Cyan
     try {
         Invoke-WebRequest -Uri $RepoZipUrl -OutFile $ZipTarget -UseBasicParsing -TimeoutSec 60
-        Write-Host "[✓] Unduhan selesai ($([math]::Round((Get-Item $ZipTarget).Length/1MB, 2)) MB)." -ForegroundColor Green
+        Write-Host "[✓] Download complete ($([math]::Round((Get-Item $ZipTarget).Length/1MB, 2)) MB)." -ForegroundColor Green
     } catch {
-        Write-Host "[x] Gagal mengunduh arsip dari GitHub: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[x] Failed to download archive from GitHub: $($_.Exception.Message)" -ForegroundColor Red
         return
     }
 
-    Write-Host "[2/3] Mengekstrak paket ke $InstallDir ..." -ForegroundColor Cyan
+    Write-Host "[2/3] Extracting package to $InstallDir ..." -ForegroundColor Cyan
     try {
         if (Test-Path $InstallDir) { Remove-Item -Path $InstallDir -Recurse -Force }
         $tempExtract = Join-Path $env:TEMP "epson_extract_temp"
@@ -57,16 +59,16 @@ if (-not (Test-Path $MainScript)) {
             Move-Item -Path $tempExtract -Destination $InstallDir -Force
         }
         Remove-Item -Path $ZipTarget -Force -ErrorAction SilentlyContinue
-        Write-Host "[✓] Paket berhasil dipasang!" -ForegroundColor Green
+        Write-Host "[✓] Package successfully installed!" -ForegroundColor Green
     } catch {
-        Write-Host "[x] Gagal mengekstrak: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[x] Failed to extract archive: $($_.Exception.Message)" -ForegroundColor Red
         return
     }
 } else {
-    Write-Host "[✓] Paket Epson Resetter Suite sudah terpasang di sistem lokal." -ForegroundColor Green
+    Write-Host "[✓] Epson Resetter Suite is already installed on local system." -ForegroundColor Green
 }
 
-Write-Host "[3/3] Meluncurkan antarmuka CLI/GUI..." -ForegroundColor Cyan
+Write-Host "[3/3] Launching interactive CLI/GUI..." -ForegroundColor Cyan
 Start-Sleep -Milliseconds 500
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $InstallDir "src\EpsonResetter.ps1")
