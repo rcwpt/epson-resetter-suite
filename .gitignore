@@ -1,0 +1,10 @@
+# Epson Resetter Suite Git Ignore
+downloads/
+extracted/
+*.py
+*.log
+check_threat.ps1
+download_resetters.ps1
+inspect_resetters.ps1
+__pycache__/
+*.tmp
