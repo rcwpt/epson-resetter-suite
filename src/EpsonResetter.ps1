@@ -48,6 +48,7 @@ Active Trojans & Critical Malware Droppers Detected in the original files:
 5. Epson L4150 Resetters/Adjprrog L4150.exe -> Trojan:Win32/Tiggre!rfn (Severity: 5)
 
 SANITIZED, 100% CLEAN TOOLS INCLUDED IN THIS SUITE:
+[✓] L3110 Series (Dedicated Edition)         -> 0 Threats (Clean)
 [✓] L110 / L210 / L300 / L350 / L355 Series -> 0 Threats (Clean)
 [✓] L120 (Patched Edition)                  -> 0 Threats (Clean)
 [✓] L130 / L220 / L310 / L360 / L365 Series  -> 0 Threats (Clean)
@@ -180,16 +181,18 @@ while ($true) {
     Write-Host "  [A]  SMART AUTO MODE (Recommended for Beginners - Auto-Detects & Fixes)" -ForegroundColor Green
     Write-Host ""
     Write-Host "  MANUAL PRINTER SELECTION:" -ForegroundColor White
-    Write-Host "  [1]  Epson L110 / L210 / L300 / L350 / L355" -ForegroundColor Cyan
-    Write-Host "  [2]  Epson L120 (Patched Edition - Ready to Use)" -ForegroundColor Cyan
-    Write-Host "  [3]  Epson L130 / L220 / L310 / L360 / L365" -ForegroundColor Cyan
-    Write-Host "  [4]  Epson L565" -ForegroundColor Cyan
-    Write-Host "  [5]  Epson L1210 / L3210 / L3250 / L3251 / L3260 / L5290 (Modern EcoTank)" -ForegroundColor Green
-    Write-Host "  [6]  Epson L6161 / L6171 / L6091" -ForegroundColor Cyan
+    Write-Host "  [1]  Epson L3110 (EcoTank All-in-One - Dedicated & Clean)" -ForegroundColor Green
+    Write-Host "  [2]  Epson L1210 / L3210 / L3250 / L3251 / L3260 / L5290 (Modern EcoTank)" -ForegroundColor Cyan
+    Write-Host "  [3]  Epson L110 / L210 / L300 / L350 / L355" -ForegroundColor Cyan
+    Write-Host "  [4]  Epson L120 (Patched Edition - Ready to Use)" -ForegroundColor Cyan
+    Write-Host "  [5]  Epson L130 / L220 / L310 / L360 / L365" -ForegroundColor Cyan
+    Write-Host "  [6]  Epson L565" -ForegroundColor Cyan
+    Write-Host "  [7]  Epson L6161 / L6171 / L6091" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  DIAGNOSTICS & UTILITIES:" -ForegroundColor White
+    Write-Host "  [C]  Direct CMD Printer Diagnostics & Test Page (Terminal Mode)" -ForegroundColor Green
+    Write-Host "  [T]  Run Ultimate Test Print Page (printertestultimate - Web Mode)" -ForegroundColor Magenta
     Write-Host "  [V]  Check & Install Official Epson Drivers (On-Demand Downloader)" -ForegroundColor Yellow
-    Write-Host "  [T]  Run Ultimate Test Print Page (printertestultimate)" -ForegroundColor Green
     Write-Host "  [D]  Detect Active Printer Connection & USB Port" -ForegroundColor Yellow
     Write-Host "  [S]  Repair / Reset Print Spooler (Fix Error 20000010)" -ForegroundColor Yellow
     Write-Host "  [M]  Malware Audit Report (DepEd Ozamiz Analysis)" -ForegroundColor Red
@@ -201,50 +204,59 @@ while ($true) {
     Write-Host "  Created with love by rcwpt | Instagram: @c.wijaya.t" -ForegroundColor DarkGray
     Write-Host "================================================================================" -ForegroundColor Cyan
     
-    $choice = Read-Host " Enter choice [A, 1-6, V, T, D, S, M, H, I, 0]"
+    $choice = Read-Host " Enter choice [A, 1-7, C, T, V, D, S, M, H, I, 0]"
     switch ($choice.Trim().ToUpper()) {
         "A" {
             Invoke-SmartAutoMode -BinBaseDir $BinDir
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "1" {
-            $tool = Join-Path $BinDir "L110_L210_L300_L350_L355"
-            Start-ResetterTool -ToolPath $tool -ExeName "Adjprogcracked.exe" -ModelLabel "L110 / L210 / L300 / L350 / L355" -DriverKey "L210"
+            $tool = Join-Path $BinDir "L3110"
+            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L3110 (Dedicated)" -DriverKey "L3110"
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "2" {
-            $tool = Join-Path $BinDir "L120"
-            Start-ResetterTool -ToolPath $tool -ExeName "L120.exe" -ModelLabel "L120" -DriverKey "L120"
-            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        }
-        "3" {
-            $tool = Join-Path $BinDir "L130_L220_L310_L360_L365"
-            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L130 / L220 / L310 / L360 / L365" -DriverKey "L220"
-            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        }
-        "4" {
-            $tool = Join-Path $BinDir "L565"
-            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L565" -DriverKey "L565"
-            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        }
-        "5" {
             $tool = Join-Path $BinDir "L1210_L3210_L3250_L3260_L5290"
             $note = "If prompted for a Password upon launch, enter: i-loadzone.com (Already copied to clipboard!)"
             try { Set-Clipboard -Value "i-loadzone.com" } catch {}
             Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L1210 / L3210 / L3250 / L3251 / L3260 / L5290" -DriverKey "L3110" -SpecialNote $note
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
+        "3" {
+            $tool = Join-Path $BinDir "L110_L210_L300_L350_L355"
+            Start-ResetterTool -ToolPath $tool -ExeName "Adjprogcracked.exe" -ModelLabel "L110 / L210 / L300 / L350 / L355" -DriverKey "L210"
+            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        "4" {
+            $tool = Join-Path $BinDir "L120"
+            Start-ResetterTool -ToolPath $tool -ExeName "L120.exe" -ModelLabel "L120" -DriverKey "L120"
+            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        "5" {
+            $tool = Join-Path $BinDir "L130_L220_L310_L360_L365"
+            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L130 / L220 / L310 / L360 / L365" -DriverKey "L220"
+            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
         "6" {
+            $tool = Join-Path $BinDir "L565"
+            Start-ResetterTool -ToolPath $tool -ExeName "Adjprog.exe" -ModelLabel "L565" -DriverKey "L565"
+            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        "7" {
             $tool = Join-Path $BinDir "L6161_L6171_L6091"
             Start-ResetterTool -ToolPath $tool -ExeName "AdjProg.exe" -ModelLabel "L6161 / L6171 / L6091" -DriverKey "L6160"
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
-        "V" {
-            Show-DriverMenu
+        "C" {
+            Show-CliPrinterDiagnostic
+            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "T" {
             Invoke-PrinterTest
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        "V" {
+            Show-DriverMenu
         }
         "D" {
             Show-PrinterDetection

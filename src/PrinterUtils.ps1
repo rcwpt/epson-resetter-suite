@@ -212,17 +212,27 @@ function Install-EpsonDriver {
 function Resolve-EpsonModelMapping {
     param ([string]$DeviceString)
     
-    # 1. Modern EcoTank Family
-    if ($DeviceString -match 'L1210|L3210|L3250|L3251|L3260|L5290|L3110|L3150|L1110|L4150') {
+    # 1. Epson L3110 (Dedicated Clean Resetter!)
+    if ($DeviceString -match 'L3110') {
         return @{
-            Series = "EcoTank Modern (L1210, L3210, L3250, L3110, L5290)"
+            Series = "Epson L3110 (Dedicated Clean Resetter)"
+            BinDir = "L3110"
+            Exe    = "Adjprog.exe"
+            Driver = "L3110"
+            NeedsPassword = $false
+        }
+    }
+    # 2. Modern EcoTank Family (L1210 / L3210 / L3250 / L5290 / L3150 / L1110)
+    if ($DeviceString -match 'L1210|L3210|L3250|L3251|L3260|L5290|L3150|L1110|L4150') {
+        return @{
+            Series = "EcoTank Modern (L1210, L3210, L3250, L5290)"
             BinDir = "L1210_L3210_L3250_L3260_L5290"
             Exe    = "Adjprog.exe"
             Driver = "L3110"
             NeedsPassword = $true
         }
     }
-    # 2. L120
+    # 3. L120
     if ($DeviceString -match 'L120') {
         return @{
             Series = "Epson L120"
@@ -232,7 +242,7 @@ function Resolve-EpsonModelMapping {
             NeedsPassword = $false
         }
     }
-    # 3. L130 / L220 / L310 / L360 / L365
+    # 4. L130 / L220 / L310 / L360 / L365
     if ($DeviceString -match 'L130|L220|L310|L360|L365') {
         return @{
             Series = "Epson L130 / L220 / L310 / L360 / L365"
@@ -242,7 +252,7 @@ function Resolve-EpsonModelMapping {
             NeedsPassword = $false
         }
     }
-    # 4. L110 / L210 / L300 / L350 / L355
+    # 5. L110 / L210 / L300 / L350 / L355
     if ($DeviceString -match 'L110|L210|L300|L350|L355') {
         return @{
             Series = "Epson L110 / L210 / L300 / L350 / L355"
@@ -252,7 +262,7 @@ function Resolve-EpsonModelMapping {
             NeedsPassword = $false
         }
     }
-    # 5. L565
+    # 6. L565
     if ($DeviceString -match 'L565') {
         return @{
             Series = "Epson L565"
@@ -262,7 +272,7 @@ function Resolve-EpsonModelMapping {
             NeedsPassword = $false
         }
     }
-    # 6. L6160 / L6170 / L6190 / L6161 / L6171 / L6091
+    # 7. L6160 / L6170 / L6190 / L6161 / L6171 / L6091
     if ($DeviceString -match 'L6160|L6170|L6190|L6161|L6171|L6091') {
         return @{
             Series = "Epson L6161 / L6171 / L6091"
@@ -273,6 +283,132 @@ function Resolve-EpsonModelMapping {
         }
     }
     return $null
+}
+
+function Show-CliPrinterDiagnostic {
+    Clear-Host
+    Write-Host "================================================================================" -ForegroundColor Cyan
+    Write-Host "                  DIRECT CLI / CMD PRINTER DIAGNOSTICS                         " -ForegroundColor Yellow
+    Write-Host "         Real-Time Hardware, Queue & Native Print Test Dashboard               " -ForegroundColor White
+    Write-Host "================================================================================" -ForegroundColor Cyan
+
+    $printers = Get-CimInstance Win32_Printer -ErrorAction SilentlyContinue
+    $epsonPrinters = $printers | Where-Object { $_.Name -like "*Epson*" -or $_.DriverName -like "*Epson*" }
+    $targetPrinters = if ($epsonPrinters.Count -gt 0) { $epsonPrinters } else { $printers }
+
+    if (-not $targetPrinters -or $targetPrinters.Count -eq 0) {
+        Write-Host "`n[!] No printers detected in Windows." -ForegroundColor Yellow
+        Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        return
+    }
+
+    Write-Host "`nSelect printer to diagnose:" -ForegroundColor White
+    for ($i = 0; $i -lt $targetPrinters.Count; $i++) {
+        $p = $targetPrinters[$i]
+        $defTag = if ($p.Default) { "[DEFAULT]" } else { "" }
+        Write-Host "  [$($i+1)] $($p.Name) | Port: $($p.PortName) $defTag" -ForegroundColor Cyan
+    }
+
+    $idxInput = Read-Host "`nEnter printer number [1-$($targetPrinters.Count)]"
+    $selectedIdx = [int]$idxInput - 1
+    if ($selectedIdx -lt 0 -or $selectedIdx -ge $targetPrinters.Count) { $selectedIdx = 0 }
+    $selPrinter = $targetPrinters[$selectedIdx]
+
+    while ($true) {
+        Clear-Host
+        Write-Host "================================================================================" -ForegroundColor Cyan
+        Write-Host "             PRINTER DIAGNOSTIC REPORT: $($selPrinter.Name)                    " -ForegroundColor Green
+        Write-Host "================================================================================" -ForegroundColor Cyan
+
+        $live = Get-CimInstance Win32_Printer -Filter "Name='$($selPrinter.Name)'" -ErrorAction SilentlyContinue
+        if (-not $live) { $live = $selPrinter }
+
+        $stateText = if ($live.WorkOffline) { "OFFLINE" } else { "ONLINE / READY" }
+        $stateColor = if ($live.WorkOffline) { "Red" } else { "Green" }
+
+        $statusMap = @{
+            1 = "Other"; 2 = "Unknown"; 3 = "Idle / Ready"; 4 = "Printing"; 5 = "Warming Up"
+            6 = "Stopped"; 7 = "Offline"; 8 = "Paused"; 9 = "Error"; 10 = "Busy"
+            11 = "Not Available"; 12 = "Waiting"; 13 = "Processing"; 14 = "Initialization"
+        }
+        $extStatus = if ($statusMap.ContainsKey($live.ExtendedPrinterStatus)) { $statusMap[$live.ExtendedPrinterStatus] } else { "Normal" }
+
+        $errorMap = @{
+            0 = "Unknown"; 1 = "Other"; 2 = "No Error (Normal)"; 3 = "Low Paper"; 4 = "No Paper"
+            5 = "Low Toner/Ink"; 6 = "No Toner/Ink"; 7 = "Door Open"; 8 = "Jammed"; 9 = "Service Requested"
+        }
+        $detectedError = if ($errorMap.ContainsKey($live.DetectedErrorState)) { $errorMap[$live.DetectedErrorState] } else { "No Error" }
+
+        $jobs = Get-CimInstance Win32_PrintJob -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*$($selPrinter.Name)*" }
+        $jobCount = if ($jobs) { $jobs.Count } else { 0 }
+
+        Write-Host " [HARDWARE & CONNECTION]" -ForegroundColor Yellow
+        Write-Host "  * Printer Device Name : $($live.Name)" -ForegroundColor White
+        Write-Host "  * Port / Communication: $($live.PortName)" -ForegroundColor White
+        Write-Host "  * Online / Link State : $stateText" -ForegroundColor $stateColor
+        Write-Host "  * Extended Device Stat: $extStatus" -ForegroundColor White
+        Write-Host "  * Sensor / Error State: $detectedError" -ForegroundColor (if ($detectedError -match 'No Error') { 'Green' } else { 'Red' })
+        
+        Write-Host "`n [SPOOLER & QUEUE HEALTH]" -ForegroundColor Yellow
+        Write-Host "  * Print Jobs in Queue : $jobCount job(s)" -ForegroundColor (if ($jobCount -gt 0) { 'Yellow' } else { 'Green' })
+        if ($jobCount -gt 0) {
+            foreach ($j in $jobs) {
+                Write-Host "    - Job #$($j.JobId): '$($j.Document)' (Pages: $($j.TotalPages), Status: $($j.JobStatus))" -ForegroundColor DarkGray
+            }
+        }
+        
+        Write-Host "`n [DRIVER SPECIFICATIONS]" -ForegroundColor Yellow
+        Write-Host "  * Driver Name         : $($live.DriverName)" -ForegroundColor White
+        Write-Host "  * Print Processor     : $($live.PrintProcessor)" -ForegroundColor DarkGray
+        Write-Host "  * Data Type Format    : $($live.PrintJobDataType)" -ForegroundColor DarkGray
+
+        Write-Host "`n================================================================================" -ForegroundColor Cyan
+        Write-Host " DIAGNOSTIC COMMANDS (DIRECT FROM TERMINAL):" -ForegroundColor White
+        Write-Host " [P]  Send Native Windows Test Page directly to this Printer (CMD Mode)" -ForegroundColor Green
+        Write-Host " [C]  Clear / Cancel all pending jobs in this queue" -ForegroundColor Yellow
+        Write-Host " [R]  Refresh live diagnostics" -ForegroundColor Cyan
+        Write-Host " [W]  Launch Web Vector Test Tool (printertestultimate)" -ForegroundColor Magenta
+        Write-Host " [0]  Return to Main Menu" -ForegroundColor DarkGray
+        Write-Host "================================================================================" -ForegroundColor Cyan
+
+        $diagCmd = Read-Host " Enter command [P, C, R, W, 0]"
+        switch ($diagCmd.Trim().ToUpper()) {
+            "P" {
+                Write-Host "`n[i] Sending native test page to '$($selPrinter.Name)'..." -ForegroundColor Cyan
+                try {
+                    Start-Process -FilePath "rundll32.exe" -ArgumentList "printui.dll,PrintUIEntry /k /n `"$($selPrinter.Name)`"" -Wait
+                    Write-Host "[✓] Native test page command dispatched to printer spooler!" -ForegroundColor Green
+                } catch {
+                    Write-Host "[x] Error sending test page: $($_.Exception.Message)" -ForegroundColor Red
+                }
+                Start-Sleep -Seconds 2
+            }
+            "C" {
+                Write-Host "`n[i] Cancelling jobs for '$($selPrinter.Name)'..." -ForegroundColor Cyan
+                if ($jobs) {
+                    foreach ($j in $jobs) {
+                        try {
+                            $j | Remove-CimInstance
+                            Write-Host "    [✓] Cancelled job #$($j.JobId)" -ForegroundColor Green
+                        } catch { }
+                    }
+                }
+                Reset-PrinterSpooler -Silent $true
+                Write-Host "[✓] Spooler queue purged and reset!" -ForegroundColor Green
+                Start-Sleep -Seconds 2
+            }
+            "W" {
+                Invoke-PrinterTest
+                Start-Sleep -Seconds 2
+            }
+            "R" {
+                # refreshes automatically
+            }
+            "0" {
+                return
+            }
+        }
+    }
 }
 
 function Invoke-PrinterTest {
@@ -319,21 +455,23 @@ function Invoke-SmartAutoMode {
     if (-not $mapping) {
         Write-Host "    [!] Could not automatically recognize the specific model number." -ForegroundColor Yellow
         Write-Host "        Detected hardware string: $detectedString" -ForegroundColor DarkGray
-        Write-Host "`n    Please select your general series:" -ForegroundColor White
-        Write-Host "    [1] L110 / L210 / L300 / L350 / L355" -ForegroundColor Cyan
-        Write-Host "    [2] L120" -ForegroundColor Cyan
-        Write-Host "    [3] L130 / L220 / L310 / L360 / L365" -ForegroundColor Cyan
-        Write-Host "    [4] L565" -ForegroundColor Cyan
-        Write-Host "    [5] L1210 / L3210 / L3250 / L3110 / L5290 (Modern EcoTank)" -ForegroundColor Green
-        Write-Host "    [6] L6161 / L6171 / L6091" -ForegroundColor Cyan
-        $manualPick = Read-Host "    Pick number [1-6]"
+        Write-Host "`n    Please select your model series:" -ForegroundColor White
+        Write-Host "    [1] Epson L3110 (Dedicated Resetter)" -ForegroundColor Green
+        Write-Host "    [2] Epson L1210 / L3210 / L3250 / L5290 / L3150" -ForegroundColor Cyan
+        Write-Host "    [3] Epson L110 / L210 / L300 / L350 / L355" -ForegroundColor Cyan
+        Write-Host "    [4] Epson L120" -ForegroundColor Cyan
+        Write-Host "    [5] Epson L130 / L220 / L310 / L360 / L365" -ForegroundColor Cyan
+        Write-Host "    [6] Epson L565" -ForegroundColor Cyan
+        Write-Host "    [7] Epson L6161 / L6171 / L6091" -ForegroundColor Cyan
+        $manualPick = Read-Host "    Pick number [1-7]"
         switch ($manualPick.Trim()) {
-            "1" { $mapping = Resolve-EpsonModelMapping "L210" }
-            "2" { $mapping = Resolve-EpsonModelMapping "L120" }
-            "3" { $mapping = Resolve-EpsonModelMapping "L220" }
-            "4" { $mapping = Resolve-EpsonModelMapping "L565" }
-            "5" { $mapping = Resolve-EpsonModelMapping "L3110" }
-            "6" { $mapping = Resolve-EpsonModelMapping "L6161" }
+            "1" { $mapping = Resolve-EpsonModelMapping "L3110" }
+            "2" { $mapping = Resolve-EpsonModelMapping "L3210" }
+            "3" { $mapping = Resolve-EpsonModelMapping "L210" }
+            "4" { $mapping = Resolve-EpsonModelMapping "L120" }
+            "5" { $mapping = Resolve-EpsonModelMapping "L220" }
+            "6" { $mapping = Resolve-EpsonModelMapping "L565" }
+            "7" { $mapping = Resolve-EpsonModelMapping "L6161" }
             default { $mapping = Resolve-EpsonModelMapping "L3110" }
         }
     }

@@ -46,16 +46,23 @@ irm https://raw.githubusercontent.com/rcwpt/epson-resetter-suite/main/get.ps1 | 
    - Checks if the official USB driver is installed; offers auto-install if missing.
    - Copies required passwords (e.g., `i-loadzone.com`) to your clipboard automatically.
    - Launches the exact matching Adjustment Program with a simple 4-step on-screen guide!
-2. **Automated Driver Verification & On-Demand Downloader (Option `[V]`):**
+2. **📟 Direct CMD Printer Diagnostics & Test Page (Option `[C]`):**
+   - **Terminal-native diagnostic dashboard** running straight inside PowerShell / CMD!
+   - Real-time printer state via WMI (`Win32_Printer`): Status, Port, Default status, and Driver version.
+   - Hardware sensor error detection: instantly flags *Paper Jam*, *Door/Cover Open*, *Out of Paper*, *Offline*, and *Low Ink*.
+   - Live print job queue monitor: displays pending document count and job IDs.
+   - **Direct CMD Native Test Print**: Dispatches Windows native diagnostic test page directly to hardware via `rundll32.exe printui.dll,PrintUIEntry /k` without opening any browser or external app.
+   - In-terminal queue purging & spooler reset.
+3. **Automated Driver Verification & On-Demand Downloader (Option `[V]`):**
    - Seamlessly fetches and installs official Epson drivers on-demand, resolving *"Port not recognized"* and *"Communication Error 21000068"*.
-3. **Integrated Diagnostic Test Print (Option `[T]`):**
-   - Directly linked with **[Printer Test Ultimate](https://github.com/rcwpt/printertestultimate)**. Prompts you automatically to run a full CMYK and nozzle test print as soon as you finish resetting!
-4. **Clean & 100% Sanitized Binaries:**
+4. **Integrated Diagnostic Test Print (Option `[T]`):**
+   - Directly linked with **[Printer Test Ultimate](https://github.com/rcwpt/printertestultimate)**. Prompts you automatically to run a full CMYK and nozzle vector test print as soon as you finish resetting!
+5. **Clean & 100% Sanitized Binaries:**
    - All trojans, backdoors, and suspicious keygens from public sources have been eliminated. Verified with Microsoft Defender Antivirus:
      ```text
      Scanning C:\...\epson-resetter-suite\bin found no threats.
      ```
-5. **Print Spooler Repair (Option `[S]`):**
+6. **Print Spooler Repair (Option `[S]`):**
    - One-click tool to terminate `spoolsv`, clear locked spooler queues in `C:\Windows\System32\spool\PRINTERS`, and restart the service.
 
 ---
@@ -64,11 +71,12 @@ irm https://raw.githubusercontent.com/rcwpt/epson-resetter-suite/main/get.ps1 | 
 
 | Series Category | Supported Models | Binary Status |
 | :--- | :--- | :--- |
+| **EcoTank L3110 Dedicated** | **L3110** (EcoTank All-in-One - Dedicated & Clean) | 🟢 100% Clean *(No Keygen Needed)* |
+| **EcoTank Modern Family** | L1210, L3210, L3250, L3251, L3260, L5290 | 🟢 100% Clean *(Auto-Clipboard: `i-loadzone.com`)* |
 | **EcoTank L-Series Classic** | L110, L210, L300, L350, L355 | 🟢 100% Clean |
 | **EcoTank L120** | L120 (Patched Edition - Ready to use) | 🟢 100% Clean |
 | **EcoTank L130 - L365** | L130, L220, L310, L360, L365 | 🟢 100% Clean |
 | **EcoTank L500 Series** | L565 | 🟢 100% Clean |
-| **EcoTank Modern Family** | L1210, L3210, L3250, L3251, L3260, L5290 | 🟢 100% Clean *(Auto-Clipboard: `i-loadzone.com`)* |
 | **EcoTank L6000 Series** | L6161, L6171, L6091 | 🟢 100% Clean |
 
 ---
