@@ -53,16 +53,21 @@ irm https://raw.githubusercontent.com/rcwpt/epson-resetter-suite/main/get.ps1 | 
    - Live print job queue monitor: displays pending document count and job IDs.
    - **Direct CMD Native Test Print**: Dispatches Windows native diagnostic test page directly to hardware via `rundll32.exe printui.dll,PrintUIEntry /k` without opening any browser or external app.
    - In-terminal queue purging & spooler reset.
-3. **Automated Driver Verification & On-Demand Downloader (Option `[V]`):**
+3. **🔧 Automated Printer Repair Wizard (Option `[R]` & in Diagnostic `[F]`):**
+   - **Fixes Duplicate Copies & USB Port Mismatches (e.g., `USB001` vs `USB005`):**
+     * **Option 1 (Fast & Safe):** Permanently sets active copy (e.g. `(Copy 1)`) as Windows Default Printer and disables Windows automatic default printer management (`LegacyDefaultPrinterMode = 1`).
+     * **Option 2 (Clean & Consolidate):** Automatically deletes duplicate copies (`(Copy 1)`, `(Salinan 1)`), remaps the main driver (e.g. `EPSON L3110 Series`) directly to the active USB port (`USB005`), sets as Default, and restarts Spooler.
+     * **Toggle Online:** Automatically revives printers stuck in `Offline` status.
+4. **Automated Driver Verification & On-Demand Downloader (Option `[V]`):**
    - Seamlessly fetches and installs official Epson drivers on-demand, resolving *"Port not recognized"* and *"Communication Error 21000068"*.
-4. **Integrated Diagnostic Test Print (Option `[T]`):**
+5. **Integrated Diagnostic Test Print (Option `[T]`):**
    - Directly linked with **[Printer Test Ultimate](https://github.com/rcwpt/printertestultimate)**. Prompts you automatically to run a full CMYK and nozzle vector test print as soon as you finish resetting!
-5. **Clean & 100% Sanitized Binaries:**
+6. **Clean & 100% Sanitized Binaries:**
    - All trojans, backdoors, and suspicious keygens from public sources have been eliminated. Verified with Microsoft Defender Antivirus:
      ```text
      Scanning C:\...\epson-resetter-suite\bin found no threats.
      ```
-6. **Print Spooler Repair (Option `[S]`):**
+7. **Print Spooler Repair (Option `[S]`):**
    - One-click tool to terminate `spoolsv`, clear locked spooler queues in `C:\Windows\System32\spool\PRINTERS`, and restart the service.
 
 ---

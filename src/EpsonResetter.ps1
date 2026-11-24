@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 #  EPSON RESETTER SUITE
 #  Created with love by rcwpt | Instagram: @c.wijaya.t
 # ==============================================================================
@@ -48,13 +48,13 @@ Active Trojans & Critical Malware Droppers Detected in the original files:
 5. Epson L4150 Resetters/Adjprrog L4150.exe -> Trojan:Win32/Tiggre!rfn (Severity: 5)
 
 SANITIZED, 100% CLEAN TOOLS INCLUDED IN THIS SUITE:
-[✓] L3110 Series (Dedicated Edition)         -> 0 Threats (Clean)
-[✓] L110 / L210 / L300 / L350 / L355 Series -> 0 Threats (Clean)
-[✓] L120 (Patched Edition)                  -> 0 Threats (Clean)
-[✓] L130 / L220 / L310 / L360 / L365 Series  -> 0 Threats (Clean)
-[✓] L565 Series                              -> 0 Threats (Clean)
-[✓] Modern L1210 / L3210 / L3250 / L3260 / L5290 -> 0 Threats (Clean)
-[✓] L6161 / L6171 / L6091 Series             -> 0 Threats (Clean)
+[OK] L3110 Series (Dedicated Edition)         -> 0 Threats (Clean)
+[OK] L110 / L210 / L300 / L350 / L355 Series -> 0 Threats (Clean)
+[OK] L120 (Patched Edition)                  -> 0 Threats (Clean)
+[OK] L130 / L220 / L310 / L360 / L365 Series  -> 0 Threats (Clean)
+[OK] L565 Series                              -> 0 Threats (Clean)
+[OK] Modern L1210 / L3210 / L3250 / L3260 / L5290 -> 0 Threats (Clean)
+[OK] L6161 / L6171 / L6091 Series             -> 0 Threats (Clean)
 
 Windows Defender MpCmdRun scan on this suite's 'bin' directory: "found no threats".
 All malicious keygens and backdoor payloads have been permanently removed!
@@ -191,6 +191,7 @@ while ($true) {
     Write-Host ""
     Write-Host "  DIAGNOSTICS & UTILITIES:" -ForegroundColor White
     Write-Host "  [C]  Direct CMD Printer Diagnostics & Test Page (Terminal Mode)" -ForegroundColor Green
+    Write-Host "  [R]  Automated Printer Repair Wizard (Fix Duplicate Copies, Port & Default)" -ForegroundColor Yellow
     Write-Host "  [T]  Run Ultimate Test Print Page (printertestultimate - Web Mode)" -ForegroundColor Magenta
     Write-Host "  [V]  Check & Install Official Epson Drivers (On-Demand Downloader)" -ForegroundColor Yellow
     Write-Host "  [D]  Detect Active Printer Connection & USB Port" -ForegroundColor Yellow
@@ -204,7 +205,7 @@ while ($true) {
     Write-Host "  Created with love by rcwpt | Instagram: @c.wijaya.t" -ForegroundColor DarkGray
     Write-Host "================================================================================" -ForegroundColor Cyan
     
-    $choice = Read-Host " Enter choice [A, 1-7, C, T, V, D, S, M, H, I, 0]"
+    $choice = Read-Host " Enter choice [A, 1-7, C, R, T, V, D, S, M, H, I, 0]"
     switch ($choice.Trim().ToUpper()) {
         "A" {
             Invoke-SmartAutoMode -BinBaseDir $BinDir
@@ -249,6 +250,10 @@ while ($true) {
         }
         "C" {
             Show-CliPrinterDiagnostic
+            Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        "R" {
+            Invoke-PrinterIssueRepairWizard
             Write-Host "`nPress any key to return to menu..."; $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         "T" {
